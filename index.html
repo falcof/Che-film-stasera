@@ -12,8 +12,8 @@
 <meta property="og:description" content="Non sai cosa guardare? Un film o una serie TV recente e ben votata, scelta a caso o con qualche domanda.">
 <meta property="og:locale" content="it_IT">
 <meta name="twitter:card" content="summary">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F4B63F'/%3E%3Cpath d='M25 17l23 15-23 15z' fill='%23100E1A'/%3E%3C/svg%3E">
-<link rel="icon" type="image/png" sizes="48x48" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEXztT4PDRn6u0AAAAD/wUK3ijUBzMgiAAAABnRSTlP+//oA///cp1xIAAAA4klEQVR42r2UTQrCMBSEJz/LLiy4LCWEHiCQrUgJXsD7SukdvEAR11aky2rcVMF2slKc5ft4vGSSN/DOw+BDEl55jeO9Gj8BQuMA5yosFJQSKpbdAshyBVgQWUhXMnBSkKAyMgUUIv4ow8t6r2dOTnogsxQA4lJzANEaDpCfEwCZTgCRBw4wNjUHyNfTAfT8ooeBd0BkhoO3RfNCHK6841bwGf22oyDals54DVh0DAX3qt90FOjQUttj37AXlNgV1AKJOmGO/fpj/nBxHD2lVsl1TgdAKjLgFap5+gQ4j1QsPQF4Ai31r90+WAAAAABJRU5ErkJggg==">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23F4B63F'/%3E%3Cpath d='M8 27h48v25a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3z' fill='%23100E1A'/%3E%3Cpath d='M8 14a3 3 0 0 1 3-3h42a3 3 0 0 1 3 3v10H8z' fill='%23100E1A'/%3E%3Cpath d='M17 11l-6 13h7l6-13zM31 11l-6 13h7l6-13zM45 11l-6 13h7l6-13z' fill='%23F4B63F'/%3E%3C/svg%3E">
+<link rel="icon" type="image/png" sizes="48x48" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwBAMAAAClLOS0AAAAElBMVEXxsz4PDRn6u0D+wUKadDAAAACOZgK1AAAABnRSTlP+//z//wBqVtj0AAABTElEQVR42u2Uu07DQBBFz87aElW0lpCo4lgJNXIeH5DQ0rjxV9LQpAT+IDJKDXKQEFVkQ5nEWYo88COpabjFFHt2tKMjzRJHMQGVCLEbO0zXvaIKGNxHEEU9Ghm4rnILP20A8UPociJdJGqdAgsX4WQCR4HusE3p7gpvSDjDIAio2901mXAZAAEBIMrzhJHnCXieCfTEAzR0FPYq/7xgZUcZ35n9YmUPbxs9xrZZgmK09wIgiU3A6BTaLEugjw8kFrSRtAQeAYb4hk1yVAzoUBZlugcpm1wd6DPm2CH5MG0bNjmgb+QFtL/30rAOKEB3UAab4+0KRVIarOoWFIg1dZAdXNXz66qZf/A34NziiOI9rJ9aH6NkS3BdA09bAhWlifRrYJlqObvO2s06eXOk1ti5Y95sCOcfjvuw7hXVT0PCWeQKd/FrvWEWT/kBlkRalpvHPagAAAAASUVORK5CYII=">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
 <style>
@@ -232,9 +232,10 @@ leggero: ['Commedia', 'Animazione', 'Famiglia', 'Musicale'],
 emozione: ['Dramma', 'Romantico', 'Musicale', 'Animazione'],
 riflessivo: ['Dramma', 'Storico', 'Fantascienza', 'Guerra'],
 intenso: ['Thriller', 'Horror', 'Giallo'],
-adrenalina: ['Azione', 'Avventura', 'Fantascienza', 'Fantasy']
+adrenalina: ['Azione', 'Avventura', 'Fantascienza', 'Fantasy'],
+cervellotico: []
 };
-const MOOD_LABEL = { leggero: 'leggera', emozione: 'emozionante', riflessivo: 'da far pensare', intenso: 'tesa', adrenalina: 'piena di adrenalina' };
+const MOOD_LABEL = { leggero: 'leggera', emozione: 'emozionante', riflessivo: 'da far pensare', intenso: 'tesa', adrenalina: 'piena di adrenalina', cervellotico: 'cervellotica' };
 const CO_LABEL = { solo: 'da solo', coppia: 'in coppia', amici: 'con amici', famiglia: 'in famiglia' };
 const A = ['solo', 'coppia', 'amici'];
 const F = ['solo', 'coppia', 'amici', 'famiglia'];
@@ -244,7 +245,7 @@ const CATALOG = [
 { id: 'spiderman-nwh', t: 'Spider-Man: No Way Home', y: 2021, m: 148, r: 8.2, g: ['Azione', 'Avventura', 'Fantascienza'], md: ['adrenalina', 'leggero'], co: F, s: 'Un incantesimo andato male apre il multiverso e riporta nemici di altre epoche nella vita di Peter Parker.' },
 { id: 'drive-my-car', t: 'Drive My Car', y: 2021, m: 179, r: 7.6, g: ['Dramma'], md: ['riflessivo', 'emozione'], co: ['solo', 'coppia'], s: 'Un regista teatrale in lutto prepara uno spettacolo a Hiroshima e stringe un legame silenzioso con la giovane autista assegnatagli.' },
 { id: 'belfast', t: 'Belfast', y: 2021, m: 98, r: 7.3, g: ['Dramma'], md: ['emozione'], co: ['solo', 'coppia'], s: 'Nel 1969 un bambino cresce fra giochi di strada e tensioni religiose mentre la sua famiglia valuta se lasciare la città.' },
-{ id: 'eeaao', t: 'Everything Everywhere All at Once', y: 2022, m: 139, r: 7.8, g: ['Fantascienza', 'Commedia', 'Azione', 'Dramma'], md: ['adrenalina', 'emozione', 'leggero'], co: A, s: 'Una lavandaia sommersa dalle tasse scopre di poter saltare fra universi paralleli per salvare tutti, compresa sua figlia.' },
+{ id: 'eeaao', cv: true, t: 'Everything Everywhere All at Once', y: 2022, m: 139, r: 7.8, g: ['Fantascienza', 'Commedia', 'Azione', 'Dramma'], md: ['adrenalina', 'emozione', 'leggero'], co: A, s: 'Una lavandaia sommersa dalle tasse scopre di poter saltare fra universi paralleli per salvare tutti, compresa sua figlia.' },
 { id: 'topgun2', t: 'Top Gun: Maverick', y: 2022, m: 130, r: 8.2, g: ['Azione', 'Dramma'], md: ['adrenalina'], co: F, s: 'Un pilota veterano addestra una squadra di giovani per una missione quasi impossibile e fa i conti con il proprio passato.' },
 { id: 'banshees', t: 'Gli spiriti dell\'isola', y: 2022, m: 114, r: 7.7, g: ['Commedia', 'Dramma'], md: ['riflessivo'], co: ['solo', 'coppia'], s: 'Su un\'isola irlandese un uomo viene lasciato senza spiegazioni dal suo migliore amico, e la rottura degenera.' },
 { id: 'triangle', t: 'Triangle of Sadness', y: 2022, m: 147, r: 7.2, g: ['Commedia', 'Dramma'], md: ['riflessivo', 'leggero'], co: ['coppia', 'amici'], s: 'Una crociera di lusso per ricchi e influencer prende una piega imprevista e le gerarchie sociali si capovolgono.' },
@@ -252,7 +253,7 @@ const CATALOG = [
 { id: 'rrr', t: 'RRR', y: 2022, m: 182, r: 7.8, g: ['Azione', 'Dramma', 'Storico'], md: ['adrenalina'], co: A, s: 'Due rivoluzionari indiani degli anni Venti diventano amici senza sapere di trovarsi su fronti opposti.' },
 { id: 'avatar2', t: 'Avatar: La via dell\'acqua', y: 2022, m: 192, r: 7.6, g: ['Fantascienza', 'Avventura', 'Azione'], md: ['adrenalina'], co: F, s: 'Jake Sully protegge la sua famiglia e trova rifugio presso i popoli del mare di Pandora.' },
 { id: 'spiderverse2', t: 'Spider-Man: Across the Spider-Verse', y: 2023, m: 140, r: 8.5, g: ['Animazione', 'Azione', 'Avventura'], md: ['adrenalina', 'leggero'], co: F, s: 'Miles Morales attraversa il multiverso e scopre che per essere un eroe può dover sfidare le regole di tutti gli altri Spider-Man.' },
-{ id: 'oppenheimer', t: 'Oppenheimer', y: 2023, m: 180, r: 8.3, g: ['Dramma', 'Storico'], md: ['riflessivo', 'intenso'], co: A, s: 'La storia del fisico che guidò il progetto della bomba atomica e delle conseguenze, politiche e personali, di quella scelta.' },
+{ id: 'oppenheimer', cv: true, t: 'Oppenheimer', y: 2023, m: 180, r: 8.3, g: ['Dramma', 'Storico'], md: ['riflessivo', 'intenso'], co: A, s: 'La storia del fisico che guidò il progetto della bomba atomica e delle conseguenze, politiche e personali, di quella scelta.' },
 { id: 'poor-things', t: 'Povere creature!', y: 2023, m: 141, r: 7.8, g: ['Commedia', 'Fantascienza', 'Dramma'], md: ['riflessivo', 'leggero'], co: ['solo', 'coppia'], s: 'Una giovane donna riportata in vita da uno scienziato eccentrico scopre il mondo con una curiosità senza freni.' },
 { id: 'zone-interest', t: 'La zona d\'interesse', y: 2023, m: 105, r: 7.3, g: ['Dramma', 'Storico', 'Guerra'], md: ['riflessivo', 'intenso'], co: ['solo'], s: 'Una famiglia conduce una vita tranquilla in una casa con giardino accanto al muro di un campo di sterminio.' },
 { id: 'past-lives', t: 'Past Lives', y: 2023, m: 106, r: 7.8, g: ['Dramma', 'Romantico'], md: ['emozione', 'riflessivo'], co: ['solo', 'coppia'], s: 'Due amici d\'infanzia separati dall\'emigrazione si ritrovano dopo vent\'anni e si chiedono cosa sarebbe potuto essere.' },
@@ -291,7 +292,7 @@ const CATALOG = [
 ];
 const CATALOG_TV = [
 { id: 'squid-game', t: 'Squid Game', y: 2021, st: 3, ep: 55, r: 8.0, g: ['Thriller', 'Dramma', 'Azione'], md: ['intenso', 'adrenalina'], co: ['solo', 'amici'], s: 'Persone sommerse dai debiti accettano di partecipare a giochi per bambini dalle regole mortali, per un premio enorme.' },
-{ id: 'severance', t: 'Scissione (Severance)', y: 2022, st: 2, ep: 50, r: 8.7, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'Dei dipendenti hanno separato con un intervento i ricordi del lavoro da quelli privati, e scoprono cosa fa davvero la loro azienda.' },
+{ id: 'severance', cv: true, t: 'Scissione (Severance)', y: 2022, st: 2, ep: 50, r: 8.7, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'Dei dipendenti hanno separato con un intervento i ricordi del lavoro da quelli privati, e scoprono cosa fa davvero la loro azienda.' },
 { id: 'the-bear', t: 'The Bear', y: 2022, st: 4, ep: 35, r: 8.5, g: ['Commedia', 'Dramma'], md: ['intenso', 'emozione'], co: A, s: 'Un giovane chef di alta cucina eredita la tavola calda di famiglia a Chicago e prova a trasformarla in un vero ristorante.' },
 { id: 'house-dragon', t: 'House of the Dragon', y: 2022, st: 2, ep: 60, r: 8.3, g: ['Fantasy', 'Dramma', 'Azione'], md: ['adrenalina', 'intenso'], co: A, s: 'Due rami della casata Targaryen si contendono il Trono di Spade, due secoli prima degli eventi di Game of Thrones.' },
 { id: 'last-of-us', t: 'The Last of Us', y: 2023, st: 2, ep: 55, r: 8.6, g: ['Dramma', 'Fantascienza', 'Horror'], md: ['emozione', 'intenso'], co: ['solo', 'coppia'], s: 'In un\'America devastata da un\'epidemia, un contrabbandiere deve scortare una ragazza attraverso il paese.' },
@@ -309,15 +310,43 @@ const CATALOG_TV = [
 { id: 'ripley', t: 'Ripley', y: 2024, st: 1, ep: 55, r: 7.9, g: ['Thriller', 'Dramma', 'Giallo'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'Un truffatore di mezza tacca viene mandato in Italia a riportare a casa un ragazzo ricco e si infila in una vita non sua.' },
 { id: 'invincible', t: 'Invincible', y: 2021, st: 3, ep: 45, r: 8.7, g: ['Animazione', 'Azione', 'Fantascienza', 'Dramma'], md: ['adrenalina', 'intenso'], co: ['solo', 'amici'], s: 'Il figlio del supereroe più potente della Terra scopre i propri poteri e il lato oscuro della sua eredità.' },
 { id: 'reacher', t: 'Reacher', y: 2022, st: 3, ep: 50, r: 8.1, g: ['Azione', 'Thriller', 'Giallo'], md: ['adrenalina', 'intenso'], co: A, s: 'Un ex poliziotto militare vagabondo capita in cittadine dove qualcosa non quadra e risolve tutto a pugni.' },
-{ id: 'silo', t: 'Silo', y: 2023, st: 2, ep: 50, r: 8.1, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: A, s: 'Migliaia di persone vivono in un silo sotterraneo con regole ferree, finché una sceriffa comincia a farsi domande.' },
+{ id: 'silo', cv: true, t: 'Silo', y: 2023, st: 2, ep: 50, r: 8.1, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: A, s: 'Migliaia di persone vivono in un silo sotterraneo con regole ferree, finché una sceriffa comincia a farsi domande.' },
 { id: 'mare-easttown', t: 'Omicidio a Easttown', y: 2021, st: 1, ep: 55, r: 8.3, g: ['Dramma', 'Giallo', 'Thriller'], md: ['intenso', 'emozione'], co: ['solo', 'coppia'], s: 'Una detective di provincia indaga su un omicidio mentre la sua vita privata va in pezzi.' },
 { id: 'yellowjackets', t: 'Yellowjackets', y: 2021, st: 3, ep: 50, r: 7.8, g: ['Thriller', 'Horror', 'Dramma'], md: ['intenso'], co: ['solo', 'amici'], s: 'Una squadra di calcio liceale sopravvive a un incidente aereo nella foresta, mentre da adulte le giocatrici ne portano il peso.' },
 { id: 'wednesday', t: 'Mercoledì', y: 2022, st: 2, ep: 50, r: 8.0, g: ['Commedia', 'Fantasy', 'Giallo'], md: ['leggero', 'intenso'], co: F, s: 'Mercoledì Addams indaga su una serie di omicidi nel collegio per ragazzi fuori dal comune in cui è stata iscritta.' },
 { id: 'shrinking', t: 'Shrinking', y: 2023, st: 2, ep: 40, r: 8.0, g: ['Commedia', 'Dramma'], md: ['leggero', 'emozione'], co: A, s: 'Un terapeuta in lutto decide di dire ai suoi pazienti ciò che pensa davvero, e la sua vita cambia.' }
 ];
 CATALOG_TV.forEach(f => { f.kind = 'tv'; f.id = 'tv-' + f.id; });
+const CULT_MOVIES = [
+{ id: 'cv-inception', cv: true, t: 'Inception', y: 2010, m: 148, r: 8.8, g: ['Fantascienza', 'Azione', 'Thriller'], md: ['adrenalina', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Un ladro specializzato nel rubare segreti dai sogni riceve il compito opposto: impiantare un\'idea nella mente di un erede.' },
+{ id: 'cv-interstellar', cv: true, t: 'Interstellar', y: 2014, m: 169, r: 8.7, g: ['Fantascienza', 'Avventura', 'Dramma'], md: ['riflessivo', 'emozione'], co: ['solo', 'coppia', 'amici'], s: 'Un gruppo di astronauti attraversa un varco spaziotemporale per cercare un nuovo mondo abitabile, mentre sulla Terra il tempo stringe.' },
+{ id: 'cv-memento', cv: true, t: 'Memento', y: 2000, m: 113, r: 8.4, g: ['Thriller', 'Giallo', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'Un uomo che non riesce a formare nuovi ricordi cerca l\'assassino della moglie con foto e tatuaggi, in una storia raccontata a ritroso.' },
+{ id: 'cv-prestige', cv: true, t: 'The Prestige', y: 2006, m: 130, r: 8.5, g: ['Dramma', 'Thriller', 'Fantascienza'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Due illusionisti rivali si sfidano con trucchi sempre più pericolosi, finché la rivalità finisce per consumarli.' },
+{ id: 'cv-tenet', cv: true, t: 'Tenet', y: 2020, m: 150, r: 7.3, g: ['Azione', 'Fantascienza', 'Thriller'], md: ['adrenalina', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Un agente segreto scopre di dover muoversi in un tempo che scorre all\'indietro per fermare una minaccia che arriva dal futuro.' },
+{ id: 'cv-dunkirk', cv: true, t: 'Dunkirk', y: 2017, m: 106, r: 7.8, g: ['Guerra', 'Dramma', 'Thriller'], md: ['intenso', 'adrenalina'], co: ['solo', 'coppia', 'amici'], s: 'Terra, mare e cielo: tre storie con tempi diversi raccontano l\'evacuazione di Dunkerque nel 1940, fino a incrociarsi.' },
+{ id: 'cv-arrival', cv: true, t: 'Arrival', y: 2016, m: 116, r: 7.9, g: ['Fantascienza', 'Dramma'], md: ['riflessivo', 'emozione'], co: ['solo', 'coppia'], s: 'Una linguista deve decifrare la lingua di misteriosi visitatori alieni, e il tentativo cambia il suo modo di vivere il tempo.' },
+{ id: 'cv-shutter-island', cv: true, t: 'Shutter Island', y: 2010, m: 138, r: 8.2, g: ['Thriller', 'Giallo', 'Dramma'], md: ['intenso'], co: ['solo', 'coppia', 'amici'], s: 'Nel 1954 due agenti indagano sulla scomparsa di una paziente da un ospedale psichiatrico su un\'isola, e niente è come sembra.' },
+{ id: 'cv-eternal-sunshine', cv: true, t: 'Se mi lasci ti cancello', y: 2004, m: 108, r: 8.3, g: ['Dramma', 'Romantico', 'Fantascienza'], md: ['emozione', 'riflessivo'], co: ['solo', 'coppia'], s: 'Dopo una rottura, due ex amanti si sottopongono a una procedura che cancella i ricordi l\'uno dell\'altra, ma qualcosa resiste.' },
+{ id: 'cv-donnie-darko', cv: true, t: 'Donnie Darko', y: 2001, m: 113, r: 8.0, g: ['Fantascienza', 'Dramma', 'Thriller'], md: ['intenso', 'riflessivo'], co: ['solo', 'amici'], s: 'Un adolescente tormentato da visioni di un coniglio inquietante scopre che il mondo finirà fra ventotto giorni.' },
+{ id: 'cv-blade-runner-2049', cv: true, t: 'Blade Runner 2049', y: 2017, m: 164, r: 8.0, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['riflessivo', 'intenso'], co: ['solo', 'coppia', 'amici'], s: 'Un nuovo cacciatore di replicanti scopre un segreto capace di sconvolgere l\'ordine sociale e parte alla ricerca di un uomo scomparso.' },
+{ id: 'cv-ex-machina', cv: true, t: 'Ex Machina', y: 2014, m: 108, r: 7.7, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Un programmatore è invitato a mettere alla prova la coscienza di un\'androide nella casa isolata del suo geniale creatore.' },
+{ id: 'cv-mulholland', cv: true, t: 'Mulholland Drive', y: 2001, m: 147, r: 7.9, g: ['Giallo', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo'], s: 'Dopo un incidente d\'auto a Los Angeles, una donna senza memoria e un\'aspirante attrice cercano la verità in un labirinto fra sogno e realtà.' },
+{ id: 'cv-predestination', cv: true, t: 'Predestination', y: 2014, m: 97, r: 7.4, g: ['Fantascienza', 'Thriller'], md: ['intenso', 'riflessivo'], co: ['solo', 'amici'], s: 'Un agente temporale in missione per fermare un attentatore incontra un barista con una storia incredibile da raccontare.' },
+{ id: 'cv-moon', cv: true, t: 'Moon', y: 2009, m: 97, r: 7.8, g: ['Fantascienza', 'Dramma', 'Thriller'], md: ['riflessivo', 'intenso'], co: ['solo', 'coppia'], s: 'Un uomo a fine turno su una base lunare, in completa solitudine, scopre di non essere solo come credeva.' },
+{ id: 'cv-matrix', cv: true, t: 'Matrix', y: 1999, m: 136, r: 8.7, g: ['Azione', 'Fantascienza'], md: ['adrenalina', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Un hacker scopre che la realtà è una simulazione e viene reclutato da un gruppo di ribelli per combatterla.' },
+];
+const CULT_TV = [
+{ id: 'cv-dark', cv: true, t: 'Dark', y: 2017, st: 3, ep: 55, r: 8.7, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'In una cittadina tedesca la scomparsa di un ragazzo riapre i segreti di quattro famiglie, fra generazioni e viaggi nel tempo.' },
+{ id: 'cv-mr-robot', cv: true, t: 'Mr. Robot', y: 2015, st: 4, ep: 45, r: 8.5, g: ['Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'Un ingegnere informatico con disturbi d\'ansia viene reclutato da un misterioso hacker per colpire la più potente multinazionale del mondo.' },
+{ id: 'cv-westworld', cv: true, t: 'Westworld', y: 2016, st: 4, ep: 60, r: 8.5, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'In un parco a tema western popolato da androidi, le macchine iniziano a ricordare e a ribellarsi ai visitatori.' },
+{ id: 'cv-black-mirror', cv: true, t: 'Black Mirror', y: 2011, st: 7, ep: 60, r: 8.7, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia', 'amici'], s: 'Episodi autoconclusivi che raccontano il lato oscuro della tecnologia e di quello che ne facciamo.' },
+{ id: 'cv-devs', cv: true, t: 'Devs', y: 2020, st: 1, ep: 50, r: 7.6, g: ['Fantascienza', 'Thriller', 'Dramma'], md: ['intenso', 'riflessivo'], co: ['solo', 'coppia'], s: 'In un\'azienda tecnologica di San Francisco una giovane ingegnera indaga sulla morte del fidanzato e su un progetto segretissimo.' },
+{ id: 'cv-the-oa', cv: true, t: 'The OA', y: 2016, st: 2, ep: 55, r: 7.8, g: ['Fantascienza', 'Fantasy', 'Dramma'], md: ['riflessivo', 'intenso'], co: ['solo', 'coppia'], s: 'Una ragazza cieca ricompare dopo sette anni con la vista ritrovata e un racconto che nessuno riesce a credere.' },
+];
+CULT_TV.forEach(f => { f.kind = 'tv'; f.id = 'tv-' + f.id; });
 function pad2(n) { return String(n).padStart(2, '0'); }
 function fits(f, a) {
+if (a.mood === 'cervellotico' && !f.cv) return false;
 if (a.maxMin && f.m && f.m > a.maxMin) return false;
 if (a.maxEp && f.ep && f.ep > a.maxEp) return false;
 if (a.maxSt && f.st && f.st > a.maxSt) return false;
@@ -334,6 +363,7 @@ return true;
 }
 function moodMatch(f, mood) {
 if (!mood) return false;
+if (mood === 'cervellotico') return !!f.cv;
 if (f.md) return f.md.indexOf(mood) !== -1;
 return f.g.some(x => MOOD_GENRES[mood].indexOf(x) !== -1);
 }
@@ -348,7 +378,8 @@ return a;
 function eligible(pool, excluded, cfg) {
 const min = cfg && cfg.minRating != null ? cfg.minRating : MIN_RATING;
 const minY = cfg && cfg.minYear ? cfg.minYear : 0;
-return pool.filter(f => !excluded.has(f.id) && f.r >= min && f.y >= minY);
+const cv = !!(cfg && cfg.mood === 'cervellotico');
+return pool.filter(f => !excluded.has(f.id) && f.r >= min && ((cv && f.cv) || f.y >= minY));
 }
 function unseenFirst(list, seen) {
 const fresh = [], old = [];
@@ -362,14 +393,15 @@ return list
 .map(x => x.f);
 }
 function suggest(pool, ans, excluded, cfg) {
-const base = eligible(pool, excluded, cfg);
+const base = eligible(pool, excluded, Object.assign({}, cfg, { mood: ans.mood }));
 const steps = [
 { key: null },
 { key: 'co', label: 'la compagnia' },
 { key: 'genres', label: 'il genere' },
 { key: 'maxSt', label: 'il numero di stagioni' },
 { key: 'maxEp', label: 'la durata degli episodi' },
-{ key: 'maxMin', label: 'la durata' }
+{ key: 'maxMin', label: 'la durata' },
+{ key: 'mood', label: 'l\'atmosfera' }
 ];
 const orig = { co: ans.co || null, mood: ans.mood || null, maxMin: ans.maxMin || null, maxEp: ans.maxEp || null, maxSt: ans.maxSt || null, genres: (ans.genres || []).slice() };
 const cur = { co: orig.co, mood: orig.mood, maxMin: orig.maxMin, maxEp: orig.maxEp, maxSt: orig.maxSt, genres: orig.genres.slice() };
@@ -398,7 +430,7 @@ return { list: [], relaxed: dropped.map(d => d.label), used: cur };
 function reasons(f, ans, relaxed) {
 const out = [];
 if (ans.co && relaxed.indexOf('la compagnia') === -1) out.push('adatto ' + CO_LABEL[ans.co]);
-if (ans.mood && moodMatch(f, ans.mood)) out.push('atmosfera ' + MOOD_LABEL[ans.mood]);
+if (ans.mood && relaxed.indexOf('l\'atmosfera') === -1 && moodMatch(f, ans.mood)) out.push('atmosfera ' + MOOD_LABEL[ans.mood]);
 if (ans.maxMin && relaxed.indexOf('la durata') === -1 && f.m) out.push('dura ' + fmtRuntime(f.m));
 if (ans.maxEp && relaxed.indexOf('la durata degli episodi') === -1 && f.ep) out.push('episodi da ' + f.ep + ' min');
 if (ans.maxSt && relaxed.indexOf('il numero di stagioni') === -1 && f.st) out.push(f.st === 1 ? 'una sola stagione' : fmtSeasons(f.st));
@@ -449,18 +481,36 @@ if (ids.length) out.push({ key: def[0], ids });
 });
 return out;
 }
+const CV_KEYWORDS = ['mindfuck', 'mind bending', 'twist ending', 'nonlinear timeline', 'time loop', 'dream', 'alternate reality', 'parallel universe', 'unreliable narrator', 'memory loss'];
+const normKw = x => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+async function loadKeywordIds(fetchFn, key) {
+let failed = 0;
+const lists = await Promise.all(CV_KEYWORDS.map(async name => {
+try {
+const r = await fetchFn(TMDB + '/search/keyword?api_key=' + key + '&query=' + encodeURIComponent(name));
+if (!r.ok) throw new Error('tmdb ' + r.status);
+const d = await r.json();
+return (d.results || []).filter(k => normKw(k.name) === normKw(name)).map(k => k.id);
+} catch (e) { failed++; return []; }
+}));
+if (failed === CV_KEYWORDS.length) throw new Error('keyword search failed');
+const out = [];
+lists.forEach(l => l.forEach(i => { if (out.indexOf(i) === -1) out.push(i); }));
+return out;
+}
 async function loadLive(fetchFn, key, today, kind, opts) {
 const tv = kind === 'tv';
 const o = opts || {};
 const minRating = o.minRating != null ? o.minRating : MIN_RATING;
 const yearsBack = o.yearsBack || YEARS_BACK;
 const prov = o.providerIds && o.providerIds.length ? '&watch_region=IT&with_watch_monetization_types=flatrate&with_watch_providers=' + o.providerIds.join('|') : '';
+const kw = o.keywordIds && o.keywordIds.length ? '&with_keywords=' + o.keywordIds.join('|') : '';
 const from = (today.getFullYear() - yearsBack) + '-' + pad2(today.getMonth() + 1) + '-' + pad2(today.getDate());
 const pages = [1, 2, 3, 4, 5];
 const res = await Promise.all(pages.map(async p => {
 const url = tv
-? TMDB + '/discover/tv?api_key=' + key + '&language=it-IT&sort_by=popularity.desc&vote_count.gte=500&vote_average.gte=' + minRating + prov + '&first_air_date.gte=' + from + '&page=' + p
-: TMDB + '/discover/movie?api_key=' + key + '&language=it-IT&region=IT&sort_by=popularity.desc&vote_count.gte=1000&vote_average.gte=' + minRating + prov + '&primary_release_date.gte=' + from + '&page=' + p;
+? TMDB + '/discover/tv?api_key=' + key + '&language=it-IT&sort_by=popularity.desc&vote_count.gte=500&vote_average.gte=' + minRating + prov + kw + (o.anyYear ? '' : '&first_air_date.gte=' + from) + '&page=' + p
+: TMDB + '/discover/movie?api_key=' + key + '&language=it-IT&region=IT&sort_by=popularity.desc&vote_count.gte=1000&vote_average.gte=' + minRating + prov + kw + (o.anyYear ? '' : '&primary_release_date.gte=' + from) + '&page=' + p;
 const r = await fetchFn(url);
 if (!r.ok) throw new Error('tmdb ' + r.status);
 return r.json();
@@ -476,9 +526,11 @@ id: (tv ? 'tv-tmdb:' : 'tmdb:') + x.id, tmdb: x.id, t: tv ? x.name : x.title, y:
 r: Math.round(x.vote_average * 10) / 10, g: mapGenres(x.genre_ids, tv),
 s: x.overview || 'Sinossi non disponibile in italiano.', poster: x.poster_path || null
 };
+if (o.cv) { item.cv = true; item.auto = true; }
 if (tv) { item.kind = 'tv'; item.st = null; item.ep = null; } else { item.m = null; }
 pool.push(item);
 }));
+if (o.cv) return pool.filter(f => f.g.length && f.g.every(g => ['Famiglia', 'Animazione', 'Musicale'].indexOf(g) === -1) && !(f.g.length === 1 && f.g[0] === 'Commedia'));
 return pool.filter(f => f.g.length);
 }
 async function hydrate(f, fetchFn, key) {
@@ -504,13 +556,13 @@ if (names.length) f.providers = names.slice(0, 5);
 f.hydrated = true;
 return f;
 }
-return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, PROVIDER_DEFS, loadProviders, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
+return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
 })();
 // ==/ENGINE==
 const TMDB_KEY = 'd15a15d8a71de354595500e66269a834';
 const GENRE_CHIPS = ['Azione', 'Avventura', 'Animazione', 'Commedia', 'Dramma', 'Fantascienza', 'Fantasy', 'Horror', 'Thriller', 'Romantico', 'Storico', 'Musicale', 'Giallo', 'Guerra', 'Famiglia'];
 const Q_CO = { key: 'co', q: 'Con chi guardi?', opts: [['solo', 'Da solo'], ['coppia', 'In coppia'], ['amici', 'Con amici'], ['famiglia', 'In famiglia']] };
-const Q_MOOD = { key: 'mood', q: 'Che atmosfera cerchi?', opts: [['leggero', 'Leggera, per svagarsi'], ['emozione', 'Emozionante'], ['riflessivo', 'Da far pensare'], ['intenso', 'Tesa, da brivido'], ['adrenalina', 'Adrenalina e spettacolo']] };
+const Q_MOOD = { key: 'mood', q: 'Che atmosfera cerchi?', opts: [['leggero', 'Leggera, per svagarsi'], ['emozione', 'Emozionante'], ['riflessivo', 'Da far pensare'], ['intenso', 'Tesa, da brivido'], ['adrenalina', 'Adrenalina e spettacolo'], ['cervellotico', 'Cervellotica, alla Nolan']] };
 const Q_GENRE = { key: 'genres', q: 'Hai un genere in mente?', multi: true };
 const STEPS = {
 movie: [Q_CO, Q_MOOD, { key: 'maxMin', q: 'Quanto tempo hai?', opts: [[100, 'Meno di 100 minuti'], [120, 'Fino a 2 ore'], [150, 'Fino a 2 ore e mezza'], [0, 'Nessun limite']] }, Q_GENRE],
@@ -523,6 +575,9 @@ const POOLS = { movie: Engine.CATALOG.slice(), tv: Engine.CATALOG_TV.slice() };
 const SRC = { movie: 'catalog', tv: 'catalog' };
 const PROV = { movie: [], tv: [] };
 const LIVE_KEY = { movie: null, tv: null };
+const CVLIVE = { movie: null, tv: null };
+const CVKEY = { movie: null, tv: null };
+let KWIDS = null;
 const CFG_DEFAULT = { minRating: 7.0, yearsBack: 5, providers: [] };
 function loadCfg() {
 const d = { minRating: CFG_DEFAULT.minRating, yearsBack: CFG_DEFAULT.yearsBack, providers: [] };
@@ -591,11 +646,12 @@ f.g.slice(0, 3).map(g => '<span class="pill">' + esc(g) + '</span>').join('');
 const why = S.reasons.length && S.mode === 'guide' ? '<p class="why">Perché ti ho proposto ' + (tv ? 'questa serie' : 'questo film') + ': ' + esc(S.reasons.join(', ')) + '.</p>' : '';
 const note = S.relaxed.length && S.mode === 'guide' ? '<p class="note">Niente corrisponde a tutte le risposte: ho messo da parte ' + esc(S.relaxed.join(', ')) + '.</p>' : '';
 const where = f.providers ? '<p class="where">In streaming in Italia: ' + esc(f.providers.join(', ')) + '.</p>' : '';
+const auto = f.auto ? '<p class="note">Trovato con le etichette degli utenti TMDB: non è detto che sia davvero un rompicapo.</p>' : '';
 return '<article class="ticket">' + coverHTML(f) +
 '<div class="info">' +
 '<div class="facts">' + facts + '</div>' +
 '<h2 id="res-title" tabindex="-1">' + esc(f.t) + '</h2>' +
-'<p class="syn">' + esc(f.s) + '</p>' + why + note + where +
+'<p class="syn">' + esc(f.s) + '</p>' + why + note + auto + where +
 '<div class="actions">' +
 '<a class="btn primary" href="' + esc(Engine.trailerUrl(f)) + '" target="_blank" rel="noopener">Guarda il trailer</a>' +
 '<a class="btn" href="' + esc(Engine.justWatchUrl(f)) + '" target="_blank" rel="noopener">Dove vederl' + (tv ? 'a' : 'o') + '</a>' +
@@ -641,7 +697,7 @@ provs.map(p => '<button class="chip" data-act="prov" data-v="' + esc(p.key) + '"
 } else {
 plat = '<p class="fnote">Il filtro per piattaforma funziona con i dati live di TMDB, che ora non sono attivi.</p>';
 }
-const note = live ? '' : '<p class="fnote">Il catalogo incorporato contiene solo titoli del 2021–2025 con voto da 7,1 in su: per allargare voto e anni servono i dati live.</p>';
+const note = live ? '' : '<p class="fnote">Il catalogo incorporato contiene solo titoli del 2021–2025 con voto da 7,1 in su: per allargare voto e anni servono i dati live. I titoli "cervellotici" ignorano il limite degli anni.</p>';
 el.innerHTML = '<summary>Filtri<span class="n" id="fsum">' + esc(filtersSummary()) + '</span></summary><div class="fbody">' +
 '<div class="slider"><label for="f-rate">Voto minimo <output id="o-rate" for="f-rate">' + fmtVote(CFG.minRating) + '</output></label>' +
 '<input type="range" id="f-rate" data-f="minRating" min="6" max="9" step="0.1" value="' + CFG.minRating + '"></div>' +
@@ -710,12 +766,42 @@ $('foot').innerHTML = live
 : 'Voti indicativi del pubblico (IMDb, ottobre 2026) su film usciti tra il 2021 e il 2025. Le piattaforme di streaming cambiano spesso: usa "Dove vederlo" per la disponibilità aggiornata in Italia.');
 }
 function focusResult() { const t = $('res-title'); if (t) { try { t.focus({ preventScroll: false }); } catch (e) { t.focus(); } } }
+function poolFor(mood) {
+const p = pool();
+if (mood !== 'cervellotico') return p;
+const live = isLive(S.kind);
+const auto = (live && CVLIVE[S.kind]) || [];
+if (live && providerIds(S.kind).length) return auto; // le piattaforme valgono solo per i titoli trovati su TMDB
+const curated = (live ? (isTv() ? Engine.CATALOG_TV : Engine.CATALOG).filter(f => f.cv) : []).concat(isTv() ? Engine.CULT_TV : Engine.CULT_MOVIES);
+const have = new Set(curated.map(f => f.t.toLowerCase()));
+return p.concat(curated, auto.filter(f => !have.has(f.t.toLowerCase())));
+}
+async function ensureCv() {
+const kind = S.kind;
+if (!isLive(kind)) return;
+const ids = providerIds(kind), k = CFG.minRating + '|' + ids.join(',');
+if (CVKEY[kind] === k) return;
+S.loading = true;
+$('stage').innerHTML = '<div class="panel"><h2 class="lead">Cerco i rompicapo…</h2><p class="sub">Sto cercando altri titoli cervellotici su TMDB.</p></div>';
+const ctl = new AbortController();
+const timer = setTimeout(() => ctl.abort(), 10000);
+const f = (u) => fetch(u, { signal: ctl.signal });
+try {
+if (!KWIDS) KWIDS = await Engine.loadKeywordIds(f, TMDB_KEY);
+CVLIVE[kind] = KWIDS.length ? await Engine.loadLive(f, TMDB_KEY, new Date(), kind, { minRating: CFG.minRating, yearsBack: CFG.yearsBack, providerIds: ids, keywordIds: KWIDS, anyYear: true, cv: true }) : [];
+CVKEY[kind] = k;
+} catch (e) {
+toast('Non riesco a cercare altri titoli su TMDB: uso il mio elenco');
+}
+clearTimeout(timer);
+S.loading = false;
+}
 function buildQueue() {
 const excluded = new Set(), seen = seenSet();
 if (S.mode === 'surprise') {
 S.queue = Engine.unseenFirst(Engine.shuffle(Engine.eligible(pool(), excluded, cfgNow())), seen); S.relaxed = []; S.ansUsed = null;
 } else {
-const r = Engine.suggest(pool(), S.ans, excluded, cfgNow());
+const r = Engine.suggest(poolFor(S.ans.mood), S.ans, excluded, cfgNow());
 S.queue = Engine.unseenFirst(r.list, seen); S.relaxed = r.relaxed; S.ansUsed = r.used;
 }
 S.qi = 0; S.done = false; S.empty = Engine.eligible(pool(), excluded, cfgNow()).length === 0;
@@ -807,7 +893,7 @@ el.setAttribute('aria-pressed', i === -1);
 return;
 }
 if (act === 'back') { S.step = Math.max(0, S.step - 1); return render(); }
-if (act === 'find') { if (S.loading) return; const kd = S.kind; await ensurePool(); if (kd !== S.kind) return render(); buildQueue(); if (S.empty) { render(); return; } return showNext(false); }
+if (act === 'find') { if (S.loading) return; const kd = S.kind; await ensurePool(); if (S.ans.mood === 'cervellotico') await ensureCv(); if (kd !== S.kind) return render(); buildQueue(); if (S.empty) { render(); return; } return showNext(false); }
 if (act === 'edit') { S.cur = null; S.done = false; S.empty = false; S.step = 0; return render(); }
 if (act === 'watch' && S.cur) {
 if (inList(WATCH, S.cur.id)) { WATCH = WATCH.filter(x => x.id !== S.cur.id); toast('Tolto dalla lista'); }
