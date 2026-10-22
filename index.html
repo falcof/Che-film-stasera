@@ -61,8 +61,8 @@ button, a { font: inherit; }
 h1 { margin: 0; font-family: var(--font-display); font-weight: 900; font-size: 34px; letter-spacing: .02em; text-transform: uppercase; line-height: 1; }
 .src { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; background: var(--surface); }
 .src b { color: var(--good); font-weight: 600; }
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 5px; }
-.tab { border: 0; background: transparent; color: var(--muted); padding: 12px 10px; border-radius: 10px; font-weight: 600; cursor: pointer; min-height: 48px; }
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 5px; }
+.tab { border: 0; background: transparent; color: var(--muted); padding: 10px 6px; font-size: 15px; line-height: 1.2; border-radius: 10px; font-weight: 600; cursor: pointer; min-height: 48px; }
 .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); }
 .tab:not([aria-selected="true"]):hover { color: var(--fg); background: var(--surface-2); }
 .stage { min-height: 340px; }
@@ -124,6 +124,28 @@ button, a.btn, .chip, .tab { touch-action: manipulation; }
 .btn.primary:hover { border-color: var(--accent); }
 .tab:not([aria-selected="true"]):hover { background: transparent; color: var(--muted); }
 }
+.ratebox { background: var(--surface); border: 1px solid var(--accent); border-radius: 20px; padding: 18px 16px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.ratebox[hidden] { display: none; }
+.ratebox p { margin: 0; }
+.ratebox .rt { margin: 0; font-size: 22px; }
+.ratebox .rt small { color: var(--muted); font-weight: 400; }
+.ratebox .rq { font-weight: 700; }
+.thumbs { display: flex; gap: 10px; }
+.thumb { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); font-weight: 700; font-size: 16px; cursor: pointer; }
+.thumb.down svg { transform: rotate(180deg); }
+.thumb:hover, .thumb:focus-visible { border-color: var(--accent); }
+.thumb[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.th { all: unset; cursor: pointer; display: inline-flex; width: 40px; height: 40px; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); box-sizing: border-box; }
+.th.down svg { transform: rotate(180deg); }
+.th[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.th:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.alts { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.alts-h { margin: 0 0 2px; font-size: 15px; color: var(--muted); font-weight: 600; }
+.alt { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-height: 48px; }
+.alt:hover, .alt:focus-visible { border-color: var(--accent); }
+.alt:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.alt .at { font-weight: 700; color: var(--fg); }
+.alt .am { font-size: 14px; color: var(--muted); }
 .summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 14px; }
 .summary .pill { color: var(--fg); }
 .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -205,6 +227,7 @@ summary { min-height: 48px; align-items: center; }
 </head>
 <body>
 <div class="app">
+<section class="ratebox" id="rate" hidden aria-live="polite"></section>
 <header class="top">
 <div class="brand">
 <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><rect x="3" y="6" width="28" height="22" rx="4" stroke="currentColor" stroke-width="2.4"/><path d="M3 12h28M3 22h28M10 6v6M17 6v6M24 6v6M10 22v6M17 22v6M24 22v6" stroke="currentColor" stroke-width="2"/></svg>
@@ -219,6 +242,7 @@ summary { min-height: 48px; align-items: center; }
 <div class="tabs" role="tablist" aria-label="Modalità">
 <button class="tab" role="tab" id="tab-surprise" data-act="mode" data-mode="surprise" aria-selected="true">Sorprendimi</button>
 <button class="tab" role="tab" id="tab-guide" data-act="mode" data-mode="guide" aria-selected="false">Aiutami a scegliere</button>
+<button class="tab" role="tab" id="tab-taste" data-act="mode" data-mode="taste" aria-selected="false">I miei gusti</button>
 </div>
 <details class="filters" id="search">
 <summary>Cerca un film<span class="n">solo film</span></summary>
@@ -601,7 +625,91 @@ if (names.length) f.providers = names.slice(0, 5);
 f.hydrated = true;
 return f;
 }
-return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, searchLocal, searchLive, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
+function moodsOf(f) {
+if (f.md && f.md.length) return f.md;
+const out = [];
+Object.keys(MOOD_GENRES).forEach(m => { if ((f.g || []).some(x => MOOD_GENRES[m].indexOf(x) !== -1)) out.push(m); });
+return out;
+}
+function tasteProfile(seen, pool) {
+const items = seen.filter(x => x.g && x.g.length);
+const wt = x => (x.v === 1 ? 1 : x.v === -1 ? 0 : 0.5);
+const cnt = (list, fn, w) => { const c = {}; list.forEach(f => fn(f).forEach(k => { c[k] = (c[k] || 0) + (w ? w(f) : 1); })); return c; };
+const bad = items.filter(x => x.v === -1);
+const n = items.reduce((a, x) => a + wt(x), 0);
+return { n, items, np: pool.length || 1,
+sg: cnt(items, f => f.g, wt), pg: cnt(pool, f => f.g || []),
+sm: cnt(items, moodsOf, wt), pm: cnt(pool, moodsOf),
+dg: cnt(bad, f => f.g), nBad: bad.length,
+likes: items.filter(x => x.v === 1).length,
+cv: items.reduce((a, x) => a + (x.cv ? wt(x) : 0), 0) / (n || 1) };
+}
+function liftLog(c, n, p, np) { const base = Math.max(p / np, 0.03); return Math.log(((c + 2 * base) / (n + 2)) / base); }
+function tasteScore(f, prof) {
+const avg = a => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+const g = avg((f.g || []).map(k => liftLog(prof.sg[k] || 0, prof.n, prof.pg[k] || 0, prof.np)));
+const m = avg(moodsOf(f).map(k => liftLog(prof.sm[k] || 0, prof.n, prof.pm[k] || 0, prof.np)));
+let sc = g + 0.6 * m;
+if (prof.nBad) sc -= 1.5 * avg((f.g || []).map(k => (prof.dg[k] || 0) / ((prof.sg[k] || 0) + (prof.dg[k] || 0) + 1)));
+if (prof.cv >= 0.25 && f.cv) sc += 0.5;
+sc += 0.1 * ((f.r || 7) - 7);
+sc += 0.8 * Math.min(f.rec || 0, 3);
+return sc;
+}
+function tasteRank(list, prof) {
+return list.map(f => ({ f, s: tasteScore(f, prof) })).sort((a, b) => b.s - a.s || (b.f.r || 0) - (a.f.r || 0)).map(x => x.f);
+}
+function tasteWhy(f, prof) {
+const out = [];
+const mine = (f.g || []).filter(k => (prof.sg[k] || 0) / (prof.n || 1) >= 0.3);
+if (mine.length) out.push('tra i tuoi generi ricorrenti: ' + mine.slice(0, 2).join(' e ').toLowerCase());
+let best = null, bj = 0;
+prof.items.forEach(x => {
+if (x.id === f.id || x.v === -1) return;
+const a = f.g || [], b = x.g || [];
+const inter = a.filter(k => b.indexOf(k) !== -1).length, uni = a.length + b.length - inter;
+const j = uni ? inter / uni : 0;
+if (j > bj) { bj = j; best = x; }
+});
+if (best && bj >= 0.5) out.push('simile a «' + best.t + '»' + (best.v === 1 ? ', che ti è piaciuto' : ''));
+if (f.cv && prof.cv >= 0.25) out.push('un rompicapo, come altri che hai visto');
+if (f.recFrom && f.recFrom.length) out.push('lo consiglia TMDB per «' + f.recFrom[0] + '»');
+return out;
+}
+async function loadRecs(fetchFn, key, seen, kind, minRating) {
+const tv = kind === 'tv';
+const src = seen.filter(x => x.tmdb).slice(0, 6);
+const agg = new Map();
+await Promise.all(src.map(async s => {
+try {
+const r = await fetchFn(TMDB + '/' + (tv ? 'tv' : 'movie') + '/' + s.tmdb + '/recommendations?api_key=' + key + '&language=it-IT&page=1');
+if (!r.ok) return;
+const d = await r.json();
+(d.results || []).slice(0, 20).forEach(x => {
+const date = tv ? x.first_air_date : x.release_date;
+const t = tv ? x.name : x.title;
+if (!t || !date || !x.vote_average || x.vote_average < minRating) return;
+const id = (tv ? 'tv-tmdb:' : 'tmdb:') + x.id;
+let e = agg.get(id);
+if (!e) {
+const item = { id, tmdb: x.id, t, y: parseInt(date.slice(0, 4), 10), r: Math.round(x.vote_average * 10) / 10, g: mapGenres(x.genre_ids, tv), s: x.overview || 'Sinossi non disponibile in italiano.', poster: x.poster_path || null, rec: 0, recFrom: [] };
+if (tv) { item.kind = 'tv'; item.st = null; item.ep = null; } else item.m = null;
+e = item; agg.set(id, e);
+}
+e.rec++; if (e.recFrom.indexOf(s.t) === -1) e.recFrom.push(s.t);
+});
+} catch (e) {  }
+}));
+return Array.from(agg.values());
+}
+async function loadMeta(fetchFn, key, kind, id) {
+const tv = kind === 'tv';
+const r = await fetchFn(TMDB + '/' + (tv ? 'tv' : 'movie') + '/' + id + '?api_key=' + key + '&language=it-IT');
+if (!r.ok) throw new Error('tmdb ' + r.status);
+const d = await r.json();
+return { g: mapGenres((d.genres || []).map(g => g.id), tv), r: d.vote_average ? Math.round(d.vote_average * 10) / 10 : null, tmdb: id };
+}
+return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, searchLocal, searchLive, mapGenres, moodsOf, tasteProfile, tasteScore, tasteRank, tasteWhy, loadRecs, loadMeta, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
 })();
 // ==/ENGINE==
 const TMDB_KEY = 'd15a15d8a71de354595500e66269a834';
@@ -649,7 +757,7 @@ return out;
 const liveKey = (kind, ids) => CFG.minRating + '|' + CFG.yearsBack + '|' + ids.join(',');
 const liveOpts = ids => ({ minRating: CFG.minRating, yearsBack: CFG.yearsBack, providerIds: ids });
 const freshAns = () => ({ co: null, mood: null, maxMin: null, maxEp: null, maxSt: null, genres: [] });
-const S = { kind: 'movie', mode: 'surprise', step: 0, ans: freshAns(), cur: null, queue: [], qi: 0, relaxed: [], reasons: [], busy: false, done: false, empty: false, ansUsed: null };
+const S = { kind: 'movie', mode: 'surprise', step: 0, ans: freshAns(), cur: null, queue: [], qi: 0, relaxed: [], reasons: [], busy: false, done: false, empty: false, ansUsed: null, batch: [], prof: null, tasteMsg: '' };
 const isTv = () => S.kind === 'tv';
 const pool = () => POOLS[S.kind];
 const steps = () => STEPS[S.kind];
@@ -660,6 +768,8 @@ set(k, v) { mem[k] = v; try { localStorage.setItem(k, JSON.stringify(v)); } catc
 };
 let WATCH = store.get('cfs_watch');
 let SEEN = store.get('cfs_seen');
+let PICK = store.get('cfs_pick');
+const RATE_AFTER = 90 * 60 * 1000; // dopo 90 minuti chiedo com'è andata
 const seenSet = () => new Set(SEEN.map(x => x.id));
 const inList = (list, id) => list.some(x => x.id === id);
 const $ = id => document.getElementById(id);
@@ -688,7 +798,7 @@ const facts = (f.r ? '<span class="pill rate" title="Voto del pubblico">★ ' + 
 ? (f.st ? '<span class="pill">' + Engine.fmtSeasons(f.st) + '</span>' : '') + (f.ep ? '<span class="pill">' + f.ep + ' min a episodio</span>' : '')
 : (f.m ? '<span class="pill">' + Engine.fmtRuntime(f.m) + '</span>' : '')) +
 (f.g || []).slice(0, 3).map(g => '<span class="pill">' + esc(g) + '</span>').join('');
-const why = S.reasons.length && S.mode === 'guide' ? '<p class="why">Perché ti ho proposto ' + (tv ? 'questa serie' : 'questo film') + ': ' + esc(S.reasons.join(', ')) + '.</p>' : '';
+const why = S.reasons.length && S.mode !== 'surprise' ? '<p class="why">Perché ti ho proposto ' + (tv ? 'questa serie' : 'questo film') + ': ' + esc(S.reasons.join(', ')) + '.</p>' : '';
 const note = S.relaxed.length && S.mode === 'guide' ? '<p class="note">Niente corrisponde a tutte le risposte: ho messo da parte ' + esc(S.relaxed.join(', ')) + '.</p>' : '';
 const where = f.providers ? '<p class="where">In streaming in Italia: ' + esc(f.providers.join(', ')) + '.</p>' : '';
 const auto = f.auto ? '<p class="note">Trovato con le etichette degli utenti TMDB: non è detto che sia davvero un rompicapo.</p>' : '';
@@ -700,11 +810,12 @@ return '<article class="ticket">' + coverHTML(f) +
 '<div class="actions">' +
 '<a class="btn primary" href="' + esc(Engine.trailerUrl(f)) + '" target="_blank" rel="noopener">Guarda il trailer</a>' +
 '<a class="btn" href="' + esc(Engine.justWatchUrl(f)) + '" target="_blank" rel="noopener">Dove vederl' + (tv ? 'a' : 'o') + '</a>' +
+'<button class="btn" data-act="pick" aria-pressed="' + inList(PICK, f.id) + '">' + (inList(PICK, f.id) ? 'Lo stai guardando ✓' : 'Guardo questo') + '</button>' +
 '<button class="btn" data-act="watch" aria-pressed="' + watched + '">' + (watched ? 'Nella lista' : 'Da vedere') + '</button>' +
 '<button class="btn" data-act="seen" aria-pressed="' + seenNow + '">' + (seenNow ? (tv ? 'Non l\'ho vista' : 'Non l\'ho visto') : (tv ? 'Già vista' : 'Già visto')) + '</button>' +
 '<button class="btn" data-act="share">Condividi</button>' +
 '</div>' +
-'<div class="row"><button class="btn" data-act="another">Non mi convince, ' + (tv ? 'un\'altra' : 'un altro') + '</button>' +
+'<div class="row"><button class="btn" data-act="another">Non mi convince, ' + (S.batch.indexOf(f) !== -1 && S.batch.length > 1 ? 'altre proposte' : (tv ? 'un\'altra' : 'un altro')) + '</button>' +
 (S.mode === 'guide' ? '<button class="link" data-act="edit">Cambia le risposte</button>' : '') + '</div>' +
 '</div></article>';
 }
@@ -756,10 +867,11 @@ function render() {
 const st = $('stage');
 $('tab-surprise').setAttribute('aria-selected', S.mode === 'surprise');
 $('tab-guide').setAttribute('aria-selected', S.mode === 'guide');
+$('tab-taste').setAttribute('aria-selected', S.mode === 'taste');
 Array.prototype.forEach.call(document.querySelectorAll('[data-act="kind"]'), b => b.setAttribute('aria-pressed', b.dataset.kind === S.kind));
 let html = '';
 if (S.mode === 'surprise') {
-if (S.cur) html = ticketHTML(S.cur);
+if (S.cur) html = ticketHTML(S.cur) + altsHTML();
 else if (S.empty) html = emptyFilters();
 else if (S.done) html = emptyHTML('Ho finito i suggerimenti.');
 else html = '<div class="panel"><h2 class="lead">Non sai cosa guardare?</h2>' +
@@ -767,8 +879,12 @@ else html = '<div class="panel"><h2 class="lead">Non sai cosa guardare?</h2>' +
 ? 'Pesco a caso tra le serie iniziate ' + yearsPhrase(true) + ' con voto ' + fmtVote(CFG.minRating) + ' o più. Se non ti convince, ne tiro fuori un\'altra.'
 : 'Pesco a caso tra i film ' + yearsPhrase(false) + ' con voto ' + fmtVote(CFG.minRating) + ' o più. Se non ti convince, ne tiro fuori un altro.') + '</p>' +
 '<button class="btn primary big" data-act="surprise">Scegli per me</button></div>';
+} else if (S.mode === 'taste') {
+if (S.cur) html = ticketHTML(S.cur) + altsHTML();
+else if (S.done) html = emptyHTML('Ho finito i suggerimenti.', 'Ho esaurito i titoli simili ai tuoi gusti: segna altri titoli come già visti o abbassa il voto minimo nei filtri.', 'taste', 'Ricalcola');
+else html = tasteHTML();
 } else {
-if (S.cur) html = summaryHTML() + ticketHTML(S.cur);
+if (S.cur) html = summaryHTML() + ticketHTML(S.cur) + altsHTML();
 else if (S.empty) html = emptyFilters();
 else if (S.done) html = summaryHTML() + emptyHTML('Ho finito i suggerimenti per queste risposte.');
 else html = stepHTML();
@@ -793,13 +909,14 @@ return '<div class="panel">' + prog + '<h2 class="lead">' + esc(step.q) + '</h2>
 }
 function renderLists() {
 const mk = (title, list, kind) => {
-const items = list.length ? list.map(x => '<div class="li"><span class="t">' + esc(x.t) + (x.y ? ' <small>(' + x.y + ')</small>' : '') + (x.k === 'tv' ? '<span class="tag">Serie TV</span>' : '') + '</span><span class="acts"><a href="' + esc(Engine.justWatchUrl(x)) + '" target="_blank" rel="noopener">Dove vederlo</a><button data-act="rm" data-kind="' + kind + '" data-id="' + esc(x.id) + '">Rimuovi</button></span></div>').join('') : '<p class="empty">' + (kind === 'watch' ? 'Nessun titolo in lista. Tocca "Da vedere" su un suggerimento.' : 'Nessun titolo segnato. I titoli che hai già visto compaiono comunque, con il banner "Già visto", ma solo dopo quelli nuovi.') + '</p>';
+const thumbs = x => kind === 'seen' ? '<span class="thumbs-s"><button class="th" data-act="rate" data-id="' + esc(x.id) + '" data-v="1" aria-pressed="' + (x.v === 1) + '" aria-label="Mi è piaciuto: ' + esc(x.t) + '">' + THUMB + '</button> <button class="th down" data-act="rate" data-id="' + esc(x.id) + '" data-v="-1" aria-pressed="' + (x.v === -1) + '" aria-label="Non mi è piaciuto: ' + esc(x.t) + '">' + THUMB + '</button></span>' : '';
+const items = list.length ? list.map(x => '<div class="li"><span class="t">' + esc(x.t) + (x.y ? ' <small>(' + x.y + ')</small>' : '') + (x.k === 'tv' ? '<span class="tag">Serie TV</span>' : '') + '</span><span class="acts">' + thumbs(x) + '<a href="' + esc(Engine.justWatchUrl(x)) + '" target="_blank" rel="noopener">Dove vederlo</a><button data-act="rm" data-kind="' + kind + '" data-id="' + esc(x.id) + '">Rimuovi</button></span></div>').join('') : '<p class="empty">' + (kind === 'watch' ? 'Nessun titolo in lista. Tocca "Da vedere" su un suggerimento.' : 'Nessun titolo segnato. I titoli che hai già visto compaiono comunque, con il banner "Già visto", ma solo dopo quelli nuovi. Il pollice serve a dirmi cosa ti è piaciuto.') + '</p>';
 return '<details' + (list.length ? ' open' : '') + '><summary>' + title + '<span class="n">' + list.length + '</span></summary>' + items + '</details>';
 };
 const lists = $('lists');
 const open = Array.prototype.map.call(lists.querySelectorAll('details'), d => d.open);
-lists.innerHTML = mk('Da vedere', WATCH, 'watch') + mk('Già visti', SEEN, 'seen');
-if (open.length === 2) Array.prototype.forEach.call(lists.querySelectorAll('details'), (d, i) => { d.open = open[i]; });
+lists.innerHTML = (PICK.length ? mk('Li stai guardando', PICK, 'pick') : '') + mk('Da vedere', WATCH, 'watch') + mk('Già visti', SEEN, 'seen');
+if (open.length === lists.querySelectorAll('details').length) Array.prototype.forEach.call(lists.querySelectorAll('details'), (d, i) => { d.open = open[i]; });
 }
 function renderFoot() {
 const live = SRC[S.kind] === 'tmdb';
@@ -869,6 +986,7 @@ toast('TMDB non risponde: uso l\'elenco già caricato');
 clearTimeout(timer);
 S.loading = false;
 }
+const BATCH = 5;
 async function showNext(withSpin) {
 if (S.busy) return;
 S.busy = true;
@@ -880,22 +998,24 @@ $('stage').innerHTML = '<article class="ticket spin">' + coverHTML(null, names[0
 const ct = $('stage').querySelector('.ct');
 for (let i = 1; i < names.length; i++) { await wait(85); if (ct) ct.textContent = names[i].t; }
 }
-let pick = null;
-while (S.qi < S.queue.length) {
-const cand = S.queue[S.qi++];
-if (SRC[kind] === 'tmdb') await Engine.hydrate(cand, (u) => fetch(u), TMDB_KEY);
-if (S.mode === 'guide' && S.ansUsed && !Engine.fits(cand, S.ansUsed)) continue;
-pick = cand; break;
+const batch = [];
+while (batch.length < BATCH && S.qi < S.queue.length) {
+const part = S.queue.slice(S.qi, S.qi + (BATCH - batch.length));
+S.qi += part.length;
+if (SRC[kind] === 'tmdb') await Promise.all(part.map(c => Engine.hydrate(c, (u) => fetch(u), TMDB_KEY)));
+part.forEach(c => { if (!(S.mode === 'guide' && S.ansUsed && !Engine.fits(c, S.ansUsed))) batch.push(c); });
 }
 if (kind !== S.kind) return; // l'utente ha cambiato sezione nel frattempo
+const pick = batch[0] || null;
+S.batch = batch;
 S.cur = pick;
 S.done = !pick;
-S.reasons = pick && S.mode === 'guide' ? Engine.reasons(pick, S.ansUsed || S.ans, S.relaxed) : [];
+S.reasons = pick ? reasonsFor(pick) : [];
 } finally { S.busy = false; }
 render();
 focusResult();
 }
-function resetFlow() { S.cur = null; S.done = false; S.empty = false; S.queue = []; S.qi = 0; S.relaxed = []; S.reasons = []; S.step = 0; }
+function resetFlow() { S.batch = []; S.prof = null; S.tasteMsg = ''; S.cur = null; S.done = false; S.empty = false; S.queue = []; S.qi = 0; S.relaxed = []; S.reasons = []; S.step = 0; }
 function setMode(m) {
 if (S.mode === m) return;
 S.mode = m; resetFlow();
@@ -907,7 +1027,129 @@ S.kind = k; S.ans = freshAns(); resetFlow();
 render(); renderFilters(); syncSearch();
 try { window.scrollTo(0, 0); } catch (e) {  }
 }
-function addTo(list, f) { if (!inList(list, f.id)) list.unshift({ id: f.id, t: f.t, y: f.y, k: f.kind === 'tv' ? 'tv' : 'movie' }); }
+function metaOf(f) {
+const e = { id: f.id, t: f.t, y: f.y, k: f.kind === 'tv' || f.k === 'tv' ? 'tv' : 'movie' };
+if (f.g && f.g.length) e.g = f.g.slice(0, 5);
+if (f.md) e.md = f.md;
+if (f.cv) e.cv = true;
+if (f.tmdb) e.tmdb = f.tmdb;
+if (f.r) e.r = f.r;
+return e;
+}
+function addTo(list, f) { if (!inList(list, f.id)) list.unshift(metaOf(f)); }
+function dropPick(id) { if (inList(PICK, id)) { PICK = PICK.filter(x => x.id !== id); store.set('cfs_pick', PICK); } }
+function setRating(f, v) {
+let e = SEEN.filter(x => x.id === f.id)[0];
+if (!e) { addTo(SEEN, f); e = SEEN[0]; }
+if (v) e.v = v; else delete e.v;
+WATCH = WATCH.filter(x => x.id !== f.id); store.set('cfs_watch', WATCH);
+dropPick(f.id);
+store.set('cfs_seen', SEEN);
+}
+const THUMB = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>';
+function pendingRatings() { const now = Date.now(); return PICK.filter(x => now - (x.at || 0) >= RATE_AFTER); }
+function renderRate() {
+const box = $('rate'), list = pendingRatings(), f = list[0];
+if (!f) { box.hidden = true; box.innerHTML = ''; return; }
+const tv = f.k === 'tv';
+box.hidden = false;
+box.innerHTML = '<p class="sub">' + (list.length > 1 ? 'Da valutare: ' + list.length + '. ' : '') + 'Avevi scelto ' + (tv ? 'questa serie' : 'questo film') + ':</p>' +
+'<h2 class="rt">' + esc(f.t) + (f.y ? ' <small>(' + f.y + ')</small>' : '') + '</h2>' +
+'<p class="rq">Ti è ' + (tv ? 'piaciuta' : 'piaciuto') + '?</p>' +
+'<div class="thumbs"><button class="thumb up" data-act="prate" data-id="' + esc(f.id) + '" data-v="1">' + THUMB + 'Sì</button>' +
+'<button class="thumb down" data-act="prate" data-id="' + esc(f.id) + '" data-v="-1">' + THUMB + 'No</button></div>' +
+'<div class="row"><button class="link" data-act="pnot" data-id="' + esc(f.id) + '">Non l\'ho ' + (tv ? 'vista' : 'visto') + ' (rimettila in lista)</button>' +
+'<button class="link" data-act="pskip" data-id="' + esc(f.id) + '">Salta la valutazione</button></div>';
+}
+let KNOWN = null;
+function knownMeta(id) {
+if (!KNOWN) {
+KNOWN = new Map();
+[Engine.CATALOG, Engine.CATALOG_TV, Engine.CULT_MOVIES, Engine.CULT_TV, POOLS.movie, POOLS.tv, CVLIVE.movie || [], CVLIVE.tv || []].forEach(a => a.forEach(f => { if (!KNOWN.has(f.id)) KNOWN.set(f.id, f); }));
+}
+return KNOWN.get(id) || null;
+}
+function seenItems(kind) {
+KNOWN = null;
+return SEEN.filter(x => (x.k || 'movie') === kind).map(x => {
+if (x.g && x.g.length) return x;
+const m = knownMeta(x.id);
+return m ? Object.assign({}, x, { g: m.g, md: m.md, cv: m.cv, tmdb: m.tmdb || x.tmdb, r: m.r }) : x;
+});
+}
+async function enrichSeen(kind) {
+const have = seenItems(kind).filter(x => x.g && x.g.length).map(x => x.id);
+const todo = SEEN.filter(x => (x.k || 'movie') === kind && have.indexOf(x.id) === -1 && /tmdb:(\d+)$/.test(x.id));
+if (!todo.length) return;
+await Promise.all(todo.map(async x => {
+try {
+const m = await Engine.loadMeta((u) => fetch(u), TMDB_KEY, kind, x.id.match(/tmdb:(\d+)$/)[1]);
+x.g = m.g.slice(0, 5); x.tmdb = m.tmdb; if (m.r) x.r = m.r;
+} catch (e) {  }
+}));
+store.set('cfs_seen', SEEN);
+}
+let TB = false;
+async function buildTaste() {
+if (S.loading || TB) return;
+TB = true;
+const kd = S.kind, tv = kd === 'tv';
+let go = false;
+try {
+await ensurePool();
+if (kd !== S.kind) return;
+S.tasteMsg = '';
+$('stage').innerHTML = '<div class="panel"><h2 class="lead">Studio i tuoi gusti…</h2><p class="sub">Guardo i titoli che hai già visto e cerco quelli più simili.</p></div>';
+if (isLive(kd)) await enrichSeen(kd);
+if (kd !== S.kind) return;
+const seen = seenItems(kd), usable = seen.filter(x => x.g && x.g.length);
+if (usable.length < 3) {
+S.tasteMsg = 'Mi servono almeno 3 ' + (tv ? 'serie' : 'film') + ' già ' + (tv ? 'viste' : 'visti') + ' per capire i tuoi gusti: per ora ne ho ' + usable.length + '.';
+return render();
+}
+const seeds = usable.filter(x => x.v !== -1).sort((a, b) => (b.v === 1) - (a.v === 1));
+let cands = pool().slice();
+if (!isLive(kd)) cands = cands.concat(tv ? Engine.CULT_TV : Engine.CULT_MOVIES);
+else if (!providerIds(kd).length) {
+try { cands = cands.concat(await Engine.loadRecs((u) => fetch(u), TMDB_KEY, seeds, kd, CFG.minRating)); } catch (e) {  }
+}
+if (kd !== S.kind) return;
+const byId = new Map();
+cands.forEach(f => { const o = byId.get(f.id); if (!o) byId.set(f.id, f); else if (f.rec) { o.rec = f.rec; o.recFrom = f.recFrom; } });
+cands = Engine.eligible(Array.from(byId.values()), seenSet(), { minRating: CFG.minRating });
+if (!cands.length) { S.tasteMsg = 'Non trovo titoli nuovi con i filtri attuali: prova ad abbassare il voto minimo.'; return render(); }
+S.prof = Engine.tasteProfile(usable, cands);
+S.queue = Engine.tasteRank(cands, S.prof);
+S.qi = 0; S.relaxed = []; S.ansUsed = null; S.empty = false; S.done = false;
+go = true;
+} finally { TB = false; }
+if (go) return showNext(false);
+}
+function reasonsFor(f) {
+if (S.mode === 'guide') return Engine.reasons(f, S.ansUsed || S.ans, S.relaxed);
+if (S.mode === 'taste' && S.prof) return Engine.tasteWhy(f, S.prof);
+return [];
+}
+function altsHTML() {
+if (!S.cur || S.batch.indexOf(S.cur) === -1 || S.batch.length < 2) return '';
+const rest = S.batch.filter(f => f !== S.cur);
+return '<section class="alts" aria-label="Altre proposte"><h3 class="alts-h">Oppure scegli tra le altre ' + rest.length + ' proposte</h3>' + rest.map(f => {
+const tv = f.kind === 'tv';
+const meta = [f.y, f.r ? '★ ' + fmtVote(f.r) : '', (f.g || []).slice(0, 2).join(', '), !tv && f.m ? Engine.fmtRuntime(f.m) : '', inList(SEEN, f.id) ? (tv ? 'già vista' : 'già visto') : ''].filter(Boolean).join(' · ');
+return '<button class="alt" data-act="pickalt" data-id="' + esc(f.id) + '"><span class="at">' + esc(f.t) + '</span><span class="am">' + esc(meta) + '</span></button>';
+}).join('') + '</section>';
+}
+function tasteHTML() {
+const tv = isTv(), mine = seenItems(S.kind), usable = mine.filter(x => x.g && x.g.length);
+const c = {};
+usable.forEach(x => x.g.forEach(g => { c[g] = (c[g] || 0) + 1; }));
+const top = Object.keys(c).sort((a, b) => c[b] - c[a]).slice(0, 4);
+return '<div class="panel"><h2 class="lead">Partiamo da ciò che hai già ' + 'visto' + '</h2>' +
+'<p class="sub">Guardo i generi e le atmosfere ricorrenti tra ' + (tv ? 'le serie' : 'i film') + ' che hai segnato come già ' + (tv ? 'viste' : 'visti') + ' e ti propongo 5 titoli simili che non conosci ancora. Ne hai segnat' + (tv ? 'e ' : 'i ') + mine.length + '.</p>' +
+(top.length ? '<div class="summary"><span class="sub">Generi ricorrenti:</span>' + top.map(g => '<span class="pill">' + esc(g) + ' · ' + c[g] + '</span>').join('') + '</div>' : '') +
+(S.tasteMsg ? '<p class="note">' + esc(S.tasteMsg) + '</p>' : (mine.some(x => x.v) ? '<p class="sub">Tengo conto dei tuoi pollici: ' + mine.filter(x => x.v === 1).length + ' su, ' + mine.filter(x => x.v === -1).length + ' giù. Quelli senza voto contano la metà.</p>' : '<p class="sub">Non hai ancora valutato nulla: conto tutto ciò che hai visto allo stesso modo. Con il pollice su/giù (in «Già visti») i suggerimenti migliorano.</p>')) +
+'<button class="btn primary big" data-act="taste">Suggeriscimi 5 ' + (tv ? 'serie' : 'film') + '</button></div>';
+}
 document.addEventListener('click', async (e) => {
 const el = e.target.closest('[data-act]');
 if (!el) return;
@@ -916,6 +1158,38 @@ if (act === 'kind') return setKind(el.dataset.kind);
 if (act === 'mode') return setMode(el.dataset.mode);
 if (act === 'surprise') { if (S.loading) return; const kd = S.kind; await ensurePool(); if (kd !== S.kind) return render(); buildQueue(); if (S.empty) { render(); return; } return showNext(true); }
 if (act === 'openfilters') { const f = $('filters'); f.open = true; try { f.scrollIntoView({ block: 'center' }); } catch (e2) {  } return; }
+if (act === 'taste') return buildTaste();
+if (act === 'pick' && S.cur) {
+if (inList(PICK, S.cur.id)) { dropPick(S.cur.id); toast('Tolto da "Li stai guardando"'); }
+else {
+const e = metaOf(S.cur); e.at = Date.now();
+PICK.unshift(e); store.set('cfs_pick', PICK);
+WATCH = WATCH.filter(x => x.id !== S.cur.id); store.set('cfs_watch', WATCH);
+toast('Buona visione! Alla prossima apertura ti chiedo com\'è andata');
+}
+return render();
+}
+if (act === 'prate' || act === 'pskip' || act === 'pnot') {
+const f = PICK.filter(x => x.id === el.dataset.id)[0];
+if (!f) return renderRate();
+if (act === 'prate') { setRating(f, parseInt(el.dataset.v, 10)); toast(el.dataset.v === '1' ? 'Segnato: ti è piaciuto' : 'Segnato: non ti è piaciuto'); }
+else if (act === 'pskip') { setRating(f, 0); toast('Va bene, salto la valutazione'); }
+else { dropPick(f.id); addTo(WATCH, f); store.set('cfs_watch', WATCH); toast('Rimesso in "Da vedere"'); }
+renderRate(); return render();
+}
+if (act === 'rate') {
+const id = el.dataset.id, v = parseInt(el.dataset.v, 10), cur = SEEN.filter(x => x.id === id)[0];
+if (!cur) return;
+setRating(cur, cur.v === v ? 0 : v);
+return render();
+}
+if (act === 'pickalt') {
+const f = S.batch.filter(x => x.id === el.dataset.id)[0];
+if (!f) return;
+S.cur = f; S.reasons = reasonsFor(f); render();
+try { $('stage').scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e4) {  }
+return focusResult();
+}
 if (act === 'open') return openResult(parseInt(el.dataset.i, 10));
 if (act === 'sw' || act === 'ss') return searchToggle(act === 'sw' ? 'watch' : 'seen', parseInt(el.dataset.i, 10));
 if (act === 'freset') { CFG = { minRating: CFG_DEFAULT.minRating, yearsBack: CFG_DEFAULT.yearsBack, providers: [] }; saveCfg(); return renderFilters(); }
@@ -953,7 +1227,7 @@ if (inList(SEEN, S.cur.id)) {
 SEEN = SEEN.filter(x => x.id !== S.cur.id); store.set('cfs_seen', SEEN);
 toast(tv ? 'Tolta dai già visti' : 'Tolto dai già visti');
 } else {
-addTo(SEEN, S.cur); store.set('cfs_seen', SEEN);
+addTo(SEEN, S.cur); store.set('cfs_seen', SEEN); dropPick(S.cur.id);
 WATCH = WATCH.filter(x => x.id !== S.cur.id); store.set('cfs_watch', WATCH);
 toast(tv ? 'Segnata come vista' : 'Segnato come visto');
 }
@@ -973,6 +1247,7 @@ return;
 if (act === 'rm') {
 const id = el.dataset.id;
 if (el.dataset.kind === 'watch') { WATCH = WATCH.filter(x => x.id !== id); store.set('cfs_watch', WATCH); }
+else if (el.dataset.kind === 'pick') { dropPick(id); renderRate(); }
 else { SEEN = SEEN.filter(x => x.id !== id); store.set('cfs_seen', SEEN); S.empty = false; }
 return render();
 }
@@ -1036,7 +1311,7 @@ if (!f || S.busy) return;
 S.busy = true;
 try { if (SRC[kd] === 'tmdb' && f.tmdb) await Engine.hydrate(f, (u) => fetch(u), TMDB_KEY); } finally { S.busy = false; }
 if (kd !== S.kind) return;
-S.cur = f; S.done = false; S.empty = false; S.reasons = []; S.relaxed = [];
+S.cur = f; S.batch = []; S.done = false; S.empty = false; S.reasons = [];
 render();
 try { $('stage').scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e3) {  }
 focusResult();
@@ -1052,7 +1327,7 @@ store.set('cfs_watch', WATCH);
 } else if (inList(SEEN, f.id)) {
 SEEN = SEEN.filter(x => x.id !== f.id); store.set('cfs_seen', SEEN); toast(tv ? 'Tolta dai già visti' : 'Tolto dai già visti');
 } else {
-addTo(SEEN, f); store.set('cfs_seen', SEEN);
+addTo(SEEN, f); store.set('cfs_seen', SEEN); dropPick(f.id);
 WATCH = WATCH.filter(x => x.id !== f.id); store.set('cfs_watch', WATCH);
 toast(tv ? 'Segnata come vista' : 'Segnato come visto');
 }
@@ -1065,7 +1340,9 @@ if (e.target.dataset && e.target.dataset.f) readSlider(e.target, false);
 });
 document.addEventListener('change', (e) => { if (e.target.dataset && e.target.dataset.f) readSlider(e.target, true); });
 render();
+renderRate();
 renderFilters();
+document.addEventListener('visibilitychange', () => { if (!document.hidden) renderRate(); });
 syncSearch();
 ['movie', 'tv'].forEach(async function (kind) {
 if (!TMDB_KEY) return;
