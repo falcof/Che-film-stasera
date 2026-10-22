@@ -137,7 +137,7 @@ summary .n { color: var(--muted); font-weight: 500; }
 .li a, .li button { color: var(--accent-text); background: none; border: 0; cursor: pointer; text-decoration: underline; padding: 4px 0; font-size: 14px; }
 .empty { color: var(--muted); font-size: 14px; padding: 4px 0 16px; margin: 0; }
 footer { color: var(--muted); font-size: 13px; line-height: 1.5; }
-.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--fg); color: var(--bg); border-radius: 999px; padding: 10px 20px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20; max-width: calc(100vw - 32px); }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); background: var(--fg); color: var(--bg); border-radius: 999px; padding: 10px 20px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20; width: max-content; max-width: calc(100vw - 32px); }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 @media (max-width: 720px) {
 body { padding-block: 14px calc(100px + env(safe-area-inset-bottom, 0px)); }
@@ -188,6 +188,13 @@ summary { min-height: 48px; align-items: center; }
 .chips.sm .chip { min-height: 42px; padding: 8px 14px; font-size: 14px; }
 .fnote { margin: 0; font-size: 13px; color: var(--muted); }
 .fbody .link { padding: 4px 0; }
+.sinput { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); padding: 10px 14px; font: inherit; font-size: 16px; }
+.sinput::placeholder { color: var(--muted); }
+.sr { padding: 12px 0; }
+.sr .t small { white-space: nowrap; }
+.sr .chips { gap: 8px; }
+.li.sr button.chip { border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); text-decoration: none; padding: 8px 14px; font-size: 14px; border-radius: 999px; min-height: 42px; }
+.li.sr button.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
 .ticket { animation: none; }
 .prog .bar i, .toast { transition: none; }
@@ -211,6 +218,14 @@ summary { min-height: 48px; align-items: center; }
 <button class="tab" role="tab" id="tab-surprise" data-act="mode" data-mode="surprise" aria-selected="true">Sorprendimi</button>
 <button class="tab" role="tab" id="tab-guide" data-act="mode" data-mode="guide" aria-selected="false">Aiutami a scegliere</button>
 </div>
+<details class="filters" id="search">
+<summary>Cerca un film<span class="n">solo film</span></summary>
+<div class="fbody">
+<input type="search" id="q" class="sinput" placeholder="Es. Inception, Parasite, Dune…" aria-label="Cerca un film" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
+<p class="fnote" id="snote"></p>
+<div id="sres"></div>
+</div>
+</details>
 <details class="filters" id="filters"></details>
 <main class="stage" id="stage" aria-live="polite"></main>
 <section class="lists" id="lists" aria-label="Le tue liste"></section>
@@ -481,6 +496,34 @@ if (ids.length) out.push({ key: def[0], ids });
 });
 return out;
 }
+const normQ = x => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+function searchLocal(query, kind) {
+const n = normQ(query);
+if (n.length < 2) return [];
+const seen = new Set();
+const all = kind === 'tv' ? CATALOG_TV.concat(CULT_TV) : kind === 'movie' ? CATALOG.concat(CULT_MOVIES) : CATALOG.concat(CATALOG_TV, CULT_MOVIES, CULT_TV);
+return all.filter(f => normQ(f.t).indexOf(n) !== -1 && !seen.has(f.id) && seen.add(f.id)).slice(0, 12);
+}
+async function searchLive(fetchFn, key, query, kind) {
+const ep = kind === 'tv' ? 'tv' : kind === 'movie' ? 'movie' : 'multi';
+const r = await fetchFn(TMDB + '/search/' + ep + '?api_key=' + key + '&language=it-IT&include_adult=false&query=' + encodeURIComponent(query));
+if (!r.ok) throw new Error('tmdb ' + r.status);
+const d = await r.json();
+const out = [];
+(d.results || []).forEach(x => {
+const mt = x.media_type || kind;
+if (mt !== 'movie' && mt !== 'tv') return;
+const tv = mt === 'tv';
+const date = tv ? x.first_air_date : x.release_date;
+const y = date ? parseInt(String(date).slice(0, 4), 10) : null;
+const item = { id: (tv ? 'tv-tmdb:' : 'tmdb:') + x.id, tmdb: x.id, t: (tv ? x.name : x.title) || '', y: isNaN(y) ? null : y,
+r: x.vote_average ? Math.round(x.vote_average * 10) / 10 : null, g: mapGenres(x.genre_ids, tv), s: x.overview || '', poster: x.poster_path || null };
+if (!item.t) return;
+if (tv) item.kind = 'tv';
+out.push(item);
+});
+return out.slice(0, 10);
+}
 const CV_KEYWORDS = ['mindfuck', 'mind bending', 'twist ending', 'nonlinear timeline', 'time loop', 'dream', 'alternate reality', 'parallel universe', 'unreliable narrator', 'memory loss'];
 const normKw = x => String(x || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 async function loadKeywordIds(fetchFn, key) {
@@ -556,7 +599,7 @@ if (names.length) f.providers = names.slice(0, 5);
 f.hydrated = true;
 return f;
 }
-return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
+return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, searchLocal, searchLive, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
 })();
 // ==/ENGINE==
 const TMDB_KEY = 'd15a15d8a71de354595500e66269a834';
@@ -748,7 +791,7 @@ return '<div class="panel">' + prog + '<h2 class="lead">' + esc(step.q) + '</h2>
 }
 function renderLists() {
 const mk = (title, list, kind) => {
-const items = list.length ? list.map(x => '<div class="li"><span class="t">' + esc(x.t) + ' <small>(' + x.y + ')</small>' + (x.k === 'tv' ? '<span class="tag">Serie TV</span>' : '') + '</span><span class="acts"><a href="' + esc(Engine.justWatchUrl(x)) + '" target="_blank" rel="noopener">Dove vederlo</a><button data-act="rm" data-kind="' + kind + '" data-id="' + esc(x.id) + '">Rimuovi</button></span></div>').join('') : '<p class="empty">' + (kind === 'watch' ? 'Nessun titolo in lista. Tocca "Da vedere" su un suggerimento.' : 'Nessun titolo segnato. I titoli che hai già visto compaiono comunque, con il banner "Già visto", ma solo dopo quelli nuovi.') + '</p>';
+const items = list.length ? list.map(x => '<div class="li"><span class="t">' + esc(x.t) + (x.y ? ' <small>(' + x.y + ')</small>' : '') + (x.k === 'tv' ? '<span class="tag">Serie TV</span>' : '') + '</span><span class="acts"><a href="' + esc(Engine.justWatchUrl(x)) + '" target="_blank" rel="noopener">Dove vederlo</a><button data-act="rm" data-kind="' + kind + '" data-id="' + esc(x.id) + '">Rimuovi</button></span></div>').join('') : '<p class="empty">' + (kind === 'watch' ? 'Nessun titolo in lista. Tocca "Da vedere" su un suggerimento.' : 'Nessun titolo segnato. I titoli che hai già visto compaiono comunque, con il banner "Già visto", ma solo dopo quelli nuovi.') + '</p>';
 return '<details' + (list.length ? ' open' : '') + '><summary>' + title + '<span class="n">' + list.length + '</span></summary>' + items + '</details>';
 };
 const lists = $('lists');
@@ -859,7 +902,7 @@ render();
 function setKind(k) {
 if (S.kind === k) return;
 S.kind = k; S.ans = freshAns(); resetFlow();
-render(); renderFilters();
+render(); renderFilters(); syncSearch();
 try { window.scrollTo(0, 0); } catch (e) {  }
 }
 function addTo(list, f) { if (!inList(list, f.id)) list.unshift({ id: f.id, t: f.t, y: f.y, k: f.kind === 'tv' ? 'tv' : 'movie' }); }
@@ -871,6 +914,7 @@ if (act === 'kind') return setKind(el.dataset.kind);
 if (act === 'mode') return setMode(el.dataset.mode);
 if (act === 'surprise') { if (S.loading) return; const kd = S.kind; await ensurePool(); if (kd !== S.kind) return render(); buildQueue(); if (S.empty) { render(); return; } return showNext(true); }
 if (act === 'openfilters') { const f = $('filters'); f.open = true; try { f.scrollIntoView({ block: 'center' }); } catch (e2) {  } return; }
+if (act === 'sw' || act === 'ss') return searchToggle(act === 'sw' ? 'watch' : 'seen', parseInt(el.dataset.i, 10));
 if (act === 'freset') { CFG = { minRating: CFG_DEFAULT.minRating, yearsBack: CFG_DEFAULT.yearsBack, providers: [] }; saveCfg(); return renderFilters(); }
 if (act === 'prov') {
 const v = el.dataset.v, i = CFG.providers.indexOf(v);
@@ -937,10 +981,78 @@ else { CFG.yearsBack = Math.round(v); $('o-years').textContent = CFG.yearsBack +
 $('fsum').textContent = filtersSummary();
 if (commit) saveCfg();
 }
-document.addEventListener('input', (e) => { if (e.target.dataset && e.target.dataset.f) readSlider(e.target, false); });
+const SRCH = { n: { movie: 0, tv: 0 }, timer: null, by: { movie: { q: '', res: [], note: '' }, tv: { q: '', res: [], note: '' } } };
+function syncSearch() {
+const tv = isTv(), st = SRCH.by[S.kind];
+const sum = $('search').querySelector('summary');
+sum.firstChild.textContent = tv ? 'Cerca una serie TV' : 'Cerca un film';
+sum.querySelector('.n').textContent = tv ? 'solo serie' : 'solo film';
+const q = $('q');
+q.placeholder = tv ? 'Es. Dark, Breaking Bad, The Bear…' : 'Es. Inception, Parasite, Dune…';
+q.setAttribute('aria-label', tv ? 'Cerca una serie TV' : 'Cerca un film');
+if (q.value !== st.q) q.value = st.q;
+renderSearch();
+}
+function renderSearch() {
+const st = SRCH.by[S.kind];
+$('snote').textContent = st.note;
+$('sres').innerHTML = st.res.map((f, i) => {
+const w = inList(WATCH, f.id), sn = inList(SEEN, f.id), tv = f.kind === 'tv';
+return '<div class="li sr"><span class="t">' + esc(f.t) + (f.y ? ' <small>(' + f.y + ')</small>' : '') + (f.r ? ' <small>★ ' + fmtVote(f.r) + '</small>' : '') + '</span>' +
+'<span class="chips sm"><button class="chip" data-act="sw" data-i="' + i + '" aria-pressed="' + w + '">' + (w ? 'Nella lista' : 'Da vedere') + '</button>' +
+'<button class="chip" data-act="ss" data-i="' + i + '" aria-pressed="' + sn + '">' + (sn ? (tv ? 'Vista' : 'Visto') : (tv ? 'Già vista' : 'Già visto')) + '</button></span></div>';
+}).join('');
+}
+async function doSearch(query, kind) {
+const my = ++SRCH.n[kind];
+const st = SRCH.by[kind];
+const qy = query.trim();
+const show = () => { if (S.kind === kind) renderSearch(); };
+if (qy.length < 2) { st.res = []; st.note = qy ? 'Scrivi almeno 2 lettere.' : ''; show(); return; }
+st.note = 'Cerco…'; show();
+let res = null, live = false;
+if (TMDB_KEY && isLive(kind)) {
+const ctl = new AbortController();
+const timer = setTimeout(() => ctl.abort(), 6000);
+try { res = await Engine.searchLive((u) => fetch(u, { signal: ctl.signal }), TMDB_KEY, qy, kind); live = true; } catch (e) { res = null; }
+clearTimeout(timer);
+}
+if (my !== SRCH.n[kind]) return;
+const tv = kind === 'tv';
+if (!res) res = Engine.searchLocal(qy, kind);
+const small = 'catalogo incorporato (' + (tv ? Engine.CATALOG_TV.length + Engine.CULT_TV.length + ' serie' : Engine.CATALOG.length + Engine.CULT_MOVIES.length + ' film') + ')';
+st.res = res;
+st.note = res.length
+? (live ? res.length + ' risultati da TMDB.' : 'Cerco nel ' + small + ': con i dati live si cerca su tutto TMDB.')
+: 'Nessun risultato per "' + qy + '".' + (live ? '' : ' Cerco solo nel ' + small + ': con i dati live si cerca su tutto TMDB.');
+show();
+}
+function searchToggle(kind, i) {
+const f = SRCH.by[S.kind].res[i];
+if (!f) return;
+const tv = f.kind === 'tv';
+if (kind === 'watch') {
+if (inList(WATCH, f.id)) { WATCH = WATCH.filter(x => x.id !== f.id); toast('Tolto dalla lista'); }
+else { addTo(WATCH, f); toast('Aggiunto a "Da vedere"'); }
+store.set('cfs_watch', WATCH);
+} else if (inList(SEEN, f.id)) {
+SEEN = SEEN.filter(x => x.id !== f.id); store.set('cfs_seen', SEEN); toast(tv ? 'Tolta dai già visti' : 'Tolto dai già visti');
+} else {
+addTo(SEEN, f); store.set('cfs_seen', SEEN);
+WATCH = WATCH.filter(x => x.id !== f.id); store.set('cfs_watch', WATCH);
+toast(tv ? 'Segnata come vista' : 'Segnato come visto');
+}
+renderSearch(); renderLists();
+if (S.cur && S.cur.id === f.id) render();
+}
+document.addEventListener('input', (e) => {
+if (e.target.id === 'q') { clearTimeout(SRCH.timer); const v = e.target.value, k = S.kind; SRCH.by[k].q = v; SRCH.timer = setTimeout(() => doSearch(v, k), 350); return; }
+if (e.target.dataset && e.target.dataset.f) readSlider(e.target, false);
+});
 document.addEventListener('change', (e) => { if (e.target.dataset && e.target.dataset.f) readSlider(e.target, true); });
 render();
 renderFilters();
+syncSearch();
 ['movie', 'tv'].forEach(async function (kind) {
 if (!TMDB_KEY) return;
 const ctl = new AbortController();
