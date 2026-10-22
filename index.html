@@ -193,6 +193,8 @@ summary { min-height: 48px; align-items: center; }
 .sr { padding: 12px 0; }
 .sr .t small { white-space: nowrap; }
 .sr .chips { gap: 8px; }
+.li.sr button.tl { all: unset; cursor: pointer; font: inherit; font-weight: 700; color: var(--fg); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 3px; }
+.li.sr button.tl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 .li.sr button.chip { border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); text-decoration: none; padding: 8px 14px; font-size: 14px; border-radius: 999px; min-height: 42px; }
 .li.sr button.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
@@ -464,11 +466,11 @@ function fmtSeasons(n) { return n === 1 ? '1 stagione' : n + ' stagioni'; }
 function justWatchUrl(f) { return 'https://www.justwatch.com/it/cerca?q=' + encodeURIComponent(f.t); }
 function trailerUrl(f) {
 if (f.trailer) return 'https://www.youtube.com/watch?v=' + encodeURIComponent(f.trailer);
-return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(f.t + ' ' + f.y + (f.kind === 'tv' ? ' serie tv' : '') + ' trailer ufficiale italiano');
+return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(f.t + (f.y ? ' ' + f.y : '') + (f.kind === 'tv' ? ' serie tv' : '') + ' trailer ufficiale italiano');
 }
 function shareText(f) {
-if (f.kind === 'tv') return 'Stasera inizio la serie «' + f.t + '» (' + f.y + ')' + (f.st ? ', ' + fmtSeasons(f.st) : '') + ', voto ' + f.r.toFixed(1) + '. Dove trovarla: ' + justWatchUrl(f);
-return 'Stasera guardo «' + f.t + '» (' + f.y + ')' + (f.m ? ', ' + fmtRuntime(f.m) : '') + ', voto ' + f.r.toFixed(1) + '. Dove trovarlo: ' + justWatchUrl(f);
+if (f.kind === 'tv') return 'Stasera inizio la serie «' + f.t + '»' + (f.y ? ' (' + f.y + ')' : '') + (f.st ? ', ' + fmtSeasons(f.st) : '') + (f.r ? ', voto ' + f.r.toFixed(1) : '') + '. Dove trovarla: ' + justWatchUrl(f);
+return 'Stasera guardo «' + f.t + '»' + (f.y ? ' (' + f.y + ')' : '') + (f.m ? ', ' + fmtRuntime(f.m) : '') + (f.r ? ', voto ' + f.r.toFixed(1) : '') + '. Dove trovarlo: ' + justWatchUrl(f);
 }
 const TMDB = 'https://api.themoviedb.org/3';
 const TV_GENRES = { 10759: ['Azione', 'Avventura'], 16: ['Animazione'], 35: ['Commedia'], 80: ['Thriller', 'Giallo'], 18: ['Dramma'], 10751: ['Famiglia'], 9648: ['Giallo'], 10765: ['Fantascienza', 'Fantasy'], 10768: ['Guerra', 'Storico'] };
@@ -674,18 +676,18 @@ const h = f ? hueFor(f) : 230;
 const img = f && f.poster ? '<img src="https://image.tmdb.org/t/p/w500' + esc(f.poster) + '" alt="Locandina di ' + esc(f.t) + '" loading="lazy" onerror="this.remove()">' : '';
 const ck = f && f.kind === 'tv' ? '<div class="ck">Serie TV</div>' : '';
 const seen = f && inList(SEEN, f.id) ? '<div class="seen-banner">' + (f.kind === 'tv' ? 'Già vista' : 'Già visto') + '</div>' : '';
-return '<div class="cover" style="--h:' + h + '">' + img + ck + seen + '<div class="ct">' + esc(title != null ? title : f.t) + '</div><div class="cy">' + (f ? f.y : '') + '</div></div>';
+return '<div class="cover" style="--h:' + h + '">' + img + ck + seen + '<div class="ct">' + esc(title != null ? title : f.t) + '</div><div class="cy">' + (f && f.y ? f.y : '') + '</div></div>';
 }
 function ticketHTML(f) {
 const tv = f.kind === 'tv';
 const watched = inList(WATCH, f.id);
 const seenNow = inList(SEEN, f.id);
-const facts = '<span class="pill rate" title="Voto del pubblico">★ ' + f.r.toFixed(1) + '</span>' +
-'<span class="pill">' + f.y + '</span>' +
+const facts = (f.r ? '<span class="pill rate" title="Voto del pubblico">★ ' + f.r.toFixed(1) + '</span>' : '') +
+(f.y ? '<span class="pill">' + f.y + '</span>' : '') +
 (tv
 ? (f.st ? '<span class="pill">' + Engine.fmtSeasons(f.st) + '</span>' : '') + (f.ep ? '<span class="pill">' + f.ep + ' min a episodio</span>' : '')
 : (f.m ? '<span class="pill">' + Engine.fmtRuntime(f.m) + '</span>' : '')) +
-f.g.slice(0, 3).map(g => '<span class="pill">' + esc(g) + '</span>').join('');
+(f.g || []).slice(0, 3).map(g => '<span class="pill">' + esc(g) + '</span>').join('');
 const why = S.reasons.length && S.mode === 'guide' ? '<p class="why">Perché ti ho proposto ' + (tv ? 'questa serie' : 'questo film') + ': ' + esc(S.reasons.join(', ')) + '.</p>' : '';
 const note = S.relaxed.length && S.mode === 'guide' ? '<p class="note">Niente corrisponde a tutte le risposte: ho messo da parte ' + esc(S.relaxed.join(', ')) + '.</p>' : '';
 const where = f.providers ? '<p class="where">In streaming in Italia: ' + esc(f.providers.join(', ')) + '.</p>' : '';
@@ -694,7 +696,7 @@ return '<article class="ticket">' + coverHTML(f) +
 '<div class="info">' +
 '<div class="facts">' + facts + '</div>' +
 '<h2 id="res-title" tabindex="-1">' + esc(f.t) + '</h2>' +
-'<p class="syn">' + esc(f.s) + '</p>' + why + note + auto + where +
+'<p class="syn">' + esc(f.s || 'Nessuna trama disponibile.') + '</p>' + why + note + auto + where +
 '<div class="actions">' +
 '<a class="btn primary" href="' + esc(Engine.trailerUrl(f)) + '" target="_blank" rel="noopener">Guarda il trailer</a>' +
 '<a class="btn" href="' + esc(Engine.justWatchUrl(f)) + '" target="_blank" rel="noopener">Dove vederl' + (tv ? 'a' : 'o') + '</a>' +
@@ -914,6 +916,7 @@ if (act === 'kind') return setKind(el.dataset.kind);
 if (act === 'mode') return setMode(el.dataset.mode);
 if (act === 'surprise') { if (S.loading) return; const kd = S.kind; await ensurePool(); if (kd !== S.kind) return render(); buildQueue(); if (S.empty) { render(); return; } return showNext(true); }
 if (act === 'openfilters') { const f = $('filters'); f.open = true; try { f.scrollIntoView({ block: 'center' }); } catch (e2) {  } return; }
+if (act === 'open') return openResult(parseInt(el.dataset.i, 10));
 if (act === 'sw' || act === 'ss') return searchToggle(act === 'sw' ? 'watch' : 'seen', parseInt(el.dataset.i, 10));
 if (act === 'freset') { CFG = { minRating: CFG_DEFAULT.minRating, yearsBack: CFG_DEFAULT.yearsBack, providers: [] }; saveCfg(); return renderFilters(); }
 if (act === 'prov') {
@@ -923,7 +926,7 @@ el.setAttribute('aria-pressed', i === -1); saveCfg();
 $('fsum').textContent = filtersSummary();
 return;
 }
-if (act === 'another') return showNext(S.mode === 'surprise');
+if (act === 'another') { if (!S.queue.length) { buildQueue(); if (S.empty) return render(); } return showNext(S.mode === 'surprise'); }
 if (act === 'opt') {
 const step = steps()[S.step]; const v = el.dataset.v;
 S.ans[step.key] = v === '' ? null : (step.key === 'co' || step.key === 'mood' ? v : (parseInt(v, 10) || null));
@@ -998,7 +1001,7 @@ const st = SRCH.by[S.kind];
 $('snote').textContent = st.note;
 $('sres').innerHTML = st.res.map((f, i) => {
 const w = inList(WATCH, f.id), sn = inList(SEEN, f.id), tv = f.kind === 'tv';
-return '<div class="li sr"><span class="t">' + esc(f.t) + (f.y ? ' <small>(' + f.y + ')</small>' : '') + (f.r ? ' <small>★ ' + fmtVote(f.r) + '</small>' : '') + '</span>' +
+return '<div class="li sr"><span class="t"><button class="tl" data-act="open" data-i="' + i + '" aria-label="Apri la scheda: ' + esc(f.t) + '">' + esc(f.t) + '</button>' + (f.y ? ' <small>(' + f.y + ')</small>' : '') + (f.r ? ' <small>★ ' + fmtVote(f.r) + '</small>' : '') + '</span>' +
 '<span class="chips sm"><button class="chip" data-act="sw" data-i="' + i + '" aria-pressed="' + w + '">' + (w ? 'Nella lista' : 'Da vedere') + '</button>' +
 '<button class="chip" data-act="ss" data-i="' + i + '" aria-pressed="' + sn + '">' + (sn ? (tv ? 'Vista' : 'Visto') : (tv ? 'Già vista' : 'Già visto')) + '</button></span></div>';
 }).join('');
@@ -1026,6 +1029,17 @@ st.note = res.length
 ? (live ? res.length + ' risultati da TMDB.' : 'Cerco nel ' + small + ': con i dati live si cerca su tutto TMDB.')
 : 'Nessun risultato per "' + qy + '".' + (live ? '' : ' Cerco solo nel ' + small + ': con i dati live si cerca su tutto TMDB.');
 show();
+}
+async function openResult(i) {
+const kd = S.kind, f = SRCH.by[kd].res[i];
+if (!f || S.busy) return;
+S.busy = true;
+try { if (SRC[kd] === 'tmdb' && f.tmdb) await Engine.hydrate(f, (u) => fetch(u), TMDB_KEY); } finally { S.busy = false; }
+if (kd !== S.kind) return;
+S.cur = f; S.done = false; S.empty = false; S.reasons = []; S.relaxed = [];
+render();
+try { $('stage').scrollIntoView({ block: 'start', behavior: reduceMotion() ? 'auto' : 'smooth' }); } catch (e3) {  }
+focusResult();
 }
 function searchToggle(kind, i) {
 const f = SRCH.by[S.kind].res[i];
