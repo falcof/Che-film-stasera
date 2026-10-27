@@ -775,7 +775,7 @@ const Engine = (() => {
     const r = await fetchFn(TMDB + '/' + (tv ? 'tv' : 'movie') + '/' + id + '?api_key=' + key + '&language=it-IT');
     if (!r.ok) throw new Error('tmdb ' + r.status);
     const d = await r.json();
-    return { g: mapGenres((d.genres || []).map(g => g.id), tv), r: d.vote_average ? Math.round(d.vote_average * 10) / 10 : null, tmdb: id };
+    return { g: mapGenres((d.genres || []).map(g => g.id), tv), r: d.vote_average ? Math.round(d.vote_average * 10) / 10 : null, tmdb: id, p: d.poster_path || null };
   }
 
   return { YEARS_BACK, MIN_RATING, GENRE_IDS, ID_TO_GENRE, MOOD_GENRES, MOOD_LABEL, CO_LABEL, CATALOG, CATALOG_TV, CULT_MOVIES, CULT_TV, CV_KEYWORDS, PROVIDER_DEFS, loadProviders, loadKeywordIds, searchLocal, searchLive, mapGenres, moodsOf, tasteProfile, tasteScore, tasteRank, tasteWhy, loadRecs, loadMeta, fmtSeasons, unseenFirst, fits, moodMatch, shuffle, eligible, suggest, reasons, fmtRuntime, justWatchUrl, trailerUrl, shareText, loadLive, hydrate };
@@ -1196,6 +1196,31 @@ async function enrichSeen(kind) {
   }));
   store.set('cfs_seen', SEEN);
 }
+// Le voci salvate prima dell'aggiornamento (o dal catalogo incorporato) non hanno la locandina: con i dati live la recupero una volta sola.
+// p assente = da cercare; p = '' = cercata e non trovata (non riprovo).
+const BF = {};
+async function backfillPosters(kind) {
+  if (BF[kind]) return;
+  BF[kind] = true;
+  const todo = [WATCH, SEEN, PICK].reduce((a, l) => a.concat(l.filter(x => (x.k || 'movie') === kind && x.p === undefined)), []).slice(0, 40);
+  if (!todo.length) return;
+  await Promise.all(todo.map(async x => {
+    let p = '';
+    try {
+      const m = /tmdb:(\d+)$/.exec(x.id);
+      if (m) p = (await Engine.loadMeta((u) => fetch(u), TMDB_KEY, kind, m[1])).p || '';
+      else {
+        const res = await Engine.searchLive((u) => fetch(u), TMDB_KEY, x.t, kind);
+        const hit = res.filter(r => r.poster && r.y && x.y && Math.abs(r.y - x.y) <= 1)[0];
+        p = hit ? hit.poster : '';
+        if (hit && !x.tmdb) x.tmdb = hit.tmdb;
+      }
+    } catch (e) { return; /* rete assente: riprovo alla prossima apertura */ }
+    x.p = p;
+  }));
+  store.set('cfs_watch', WATCH); store.set('cfs_seen', SEEN); store.set('cfs_pick', PICK);
+  renderLists();
+}
 let TB = false;
 async function buildTaste() {
   if (S.loading || TB) return;
@@ -1472,6 +1497,7 @@ syncSearch();
         renderFilters();
         if (!S.busy && !S.loading && !S.cur && !S.queue.length && S.step === 0) render(); else renderFoot();
       }
+      backfillPosters(kind);
     }
   } catch (e) { /* resta il catalogo incorporato */ }
   clearTimeout(timer);
